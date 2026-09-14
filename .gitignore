@@ -1,0 +1,4 @@
+# the LostCityRS checkouts are separate git repositories (see README: Getting the game data)
+source/
+__pycache__/
+*.pyc

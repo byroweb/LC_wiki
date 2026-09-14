@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Chunk Picker - Lost City Wiki</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="assets/style.css?v=1789367887">
+<style>
+  html, body { height: 100%; overflow: hidden; }
+  #mapwrap { position: absolute; left: 0; top: 0; right: 400px; bottom: 0; background: #000; overflow: hidden; }
+  #map { display: block; width: 100%; height: 100%; cursor: pointer; image-rendering: pixelated; }
+  #panel { position: absolute; right: 0; top: 0; bottom: 0; width: 400px; background: #1b1a17; border-left: 1px solid var(--border); overflow: auto; padding: 12px 14px 40px; }
+  #panel h1 { font-size: 17px; margin: 0 0 4px; }
+  #panel h2 { font-size: 14px; margin: 16px 0 6px; }
+  #panel h3 { font-size: 13px; margin: 10px 0 4px; color: var(--accent); }
+  #tools { position: absolute; left: 12px; top: 12px; z-index: 5; background: rgba(26,25,23,.94); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 13px; max-width: 340px; }
+  #tools button, #panel button { background: var(--panel2); color: var(--text); border: 1px solid var(--border); border-radius: 4px; padding: 3px 9px; cursor: pointer; margin: 2px 2px 0 0; }
+  #tools button.on { background: var(--accent); color: #000; border-color: var(--accent); }
+  #tools input { width: 100%; padding: 5px 8px; margin-bottom: 4px; background: var(--panel2); color: var(--text); border: 1px solid var(--border); border-radius: 4px; }
+  #sugg { max-height: 180px; overflow: auto; border: 1px solid var(--border); border-radius: 4px; display: none; background: var(--panel); margin-bottom: 4px; }
+  #sugg div { padding: 3px 8px; cursor: pointer; border-bottom: 1px solid #333; }
+  #sugg div:hover { background: var(--panel2); }
+  #coords { position: absolute; left: 12px; bottom: 10px; background: rgba(0,0,0,.7); color: var(--muted); padding: 3px 8px; border-radius: 4px; font-size: 12px; z-index: 5; }
+  .pill { display: inline-block; background: var(--panel2); border: 1px solid var(--border); border-radius: 11px; padding: 1px 8px; margin: 2px 3px 2px 0; font-size: 12px; }
+  .pill b { color: var(--accent); font-weight: 600; }
+  .pill button { border: 0; background: none; color: var(--muted); cursor: pointer; padding: 0 0 0 4px; margin: 0; }
+  details { margin: 4px 0; }
+  details > summary { cursor: pointer; color: var(--link); font-size: 13px; }
+  ul.tight { margin: 4px 0; padding-left: 18px; }
+  ul.tight li { margin: 1px 0; font-size: 12.5px; }
+  .muted { color: var(--muted); }
+  .stat { display: flex; gap: 10px; flex-wrap: wrap; margin: 6px 0; }
+  .stat div { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 4px 9px; font-size: 12px; }
+  .stat b { display: block; font-size: 17px; color: var(--accent); }
+  .blocked { color: #ffb0a0; }
+  input.tick { margin: 0 5px 0 0; vertical-align: middle; cursor: pointer; }
+  li.done { opacity: .45; }
+  li.done a { text-decoration: line-through; }
+  .clearticks { float: right; font-size: 11px; }
+  table.bis { border-collapse: collapse; width: 100%; margin: 6px 0; font-size: 12.5px; }
+  table.bis td { border-top: 1px solid var(--border); padding: 3px 4px; vertical-align: middle; }
+  table.bis td.slot { color: var(--muted); width: 68px; }
+  button.styletab.on { background: var(--accent); color: #000; border-color: var(--accent); }
+  img.icon { width: 18px; height: 18px; }
+  @media (max-width: 900px) { #mapwrap { right: 0; bottom: 50%; } #panel { width: auto; left: 0; top: 50%; border-left: 0; border-top: 1px solid var(--border); } }
+</style>
+</head>
+<body>
+<div id="mapwrap"><canvas id="map"></canvas></div>
+<div id="tools">
+  <input type="text" id="find" placeholder="Find a place, NPC or item..." autocomplete="off">
+  <div id="sugg"></div>
+  <div>
+    Level: <span id="levels"></span> &nbsp;
+    <button id="zin">+</button><button id="zout">&minus;</button>
+    <button id="rand" title="Unlock a random chunk that has something in it">Random chunk</button>
+    <button id="reset">Reset</button>
+  </div>
+  <div class="small">Click a square to unlock or lock it. You start with nothing but the chunk you spawn in.</div>
+</div>
+<div id="coords"></div>
+<div id="panel"><div id="report"></div></div>
+<script src="data/chunks.js?v=1789367887"></script>
+<script src="assets/chunks.js?v=1789367887"></script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Knowledge Graph - Lost City Wiki</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  html, body { height: 100%; overflow: hidden; }
+  #g { position: absolute; inset: 0; background: #14130f; }
+  #panel { position: absolute; top: 12px; left: 12px; width: 320px; background: rgba(26,25,23,.94); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; z-index: 5; font-size: 13px; max-height: calc(100% - 24px); overflow: auto; }
+  #panel h1 { font-size: 17px; margin: 0 0 6px; }
+  #panel input[type=text] { width: 100%; padding: 6px 8px; background: var(--panel2); color: var(--text); border: 1px solid var(--border); border-radius: 4px; }
+  #sugg { max-height: 220px; overflow: auto; border: 1px solid var(--border); border-radius: 4px; display: none; background: var(--panel); }
+  #sugg div { padding: 4px 8px; cursor: pointer; border-bottom: 1px solid #333; }
+  #sugg div:hover { background: var(--panel2); }
+  #panel select { background: var(--panel2); color: var(--text); border: 1px solid var(--border); border-radius: 4px; padding: 3px 6px; }
+  #panel button { background: var(--panel2); color: var(--text); border: 1px solid var(--border); border-radius: 4px; padding: 3px 9px; cursor: pointer; margin: 4px 4px 0 0; }
+  #panel button.on { background: var(--accent); color: #000; }
+  #info { margin-top: 10px; border-top: 1px solid var(--border); padding-top: 8px; }
+  #info h3 { margin: 4px 0; }
+  #info ul { margin: 4px 0; padding-left: 18px; max-height: 300px; overflow: auto; }
+  .legend span { display: inline-flex; align-items: center; gap: 4px; margin-right: 8px; font-size: 12px; }
+  .swatch { width: 10px; height: 10px; border-radius: 50%; border: 1px solid #000; display: inline-block; }
+  label { margin-right: 8px; }
+</style>
+</head>
+<body>
+<canvas id="g"></canvas>
+<div id="panel">
+  <h1><a href="index.html" style="color:var(--accent)">Lost City</a> knowledge graph</h1>
+  <input type="text" id="find" placeholder="Search a node (NPC, item, area, quest...)" autocomplete="off">
+  <div id="sugg"></div>
+  <div style="margin:6px 0">Region: <select id="region"><option value="">Anywhere</option></select></div>
+  <div>Depth: <button id="d1" class="on">1</button><button id="d2">2</button>
+    &nbsp; Show: <label><input type="checkbox" id="f-npc" checked>NPC</label><label><input type="checkbox" id="f-item" checked>Item</label><label><input type="checkbox" id="f-area" checked>Area</label><label><input type="checkbox" id="f-quest" checked>Quest</label><label><input type="checkbox" id="f-shop" checked>Shop</label><label><input type="checkbox" id="f-table" checked>Table</label></div>
+  <div class="legend">
+    <span><i class="swatch" style="background:var(--npc)"></i>NPC</span><span><i class="swatch" style="background:var(--item)"></i>Item</span><span><i class="swatch" style="background:var(--area)"></i>Area</span><span><i class="swatch" style="background:var(--quest)"></i>Quest</span><span><i class="swatch" style="background:var(--shop)"></i>Shop</span><span><i class="swatch" style="background:var(--table)"></i>Drop table</span>
+  </div>
+  <div class="small">Click a node to focus it, double-click to open its wiki page, drag to move. Scroll to zoom.</div>
+  <div id="info"></div>
+</div>
+<script src="data/graph.js"></script>
+<script src="assets/graph.js"></script>
+</body>
+</html>

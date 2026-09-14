@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>World Map - Lost City Wiki</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="assets/style.css?v=1789367887">
+<style>
+  html, body { height: 100%; overflow: hidden; }
+  #map { position: absolute; inset: 0; background: #000; cursor: grab; image-rendering: pixelated; }
+  #map.dragging { cursor: grabbing; }
+  #panel { position: absolute; top: 12px; left: 12px; width: 300px; background: rgba(26,25,23,.94); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; z-index: 5; font-size: 13px; max-height: calc(100% - 24px); overflow: auto; }
+  #panel h1 { font-size: 17px; margin: 0 0 6px; }
+  #panel .row { margin: 6px 0; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  #panel label { display: inline-flex; align-items: center; gap: 4px; margin-right: 8px; cursor: pointer; }
+  #panel button { background: var(--panel2); color: var(--text); border: 1px solid var(--border); border-radius: 4px; padding: 3px 9px; cursor: pointer; }
+  #panel button.on { background: var(--accent); color: #000; border-color: var(--accent); }
+  #panel input[type=text] { width: 100%; padding: 6px 8px; background: var(--panel2); color: var(--text); border: 1px solid var(--border); border-radius: 4px; }
+  #sugg { max-height: 220px; overflow: auto; border: 1px solid var(--border); border-radius: 4px; display: none; background: var(--panel); }
+  #sugg div { padding: 4px 8px; cursor: pointer; border-bottom: 1px solid #333; }
+  #sugg div:hover { background: var(--panel2); }
+  #popup { position: absolute; z-index: 6; width: 320px; background: rgba(26,25,23,.97); border: 1px solid var(--accent); border-radius: 8px; padding: 10px 12px; display: none; font-size: 13px; max-height: 70%; overflow: auto; box-shadow: 0 6px 24px rgba(0,0,0,.6); }
+  #popup .ent { border-top: 1px solid var(--border); padding-top: 8px; margin-top: 8px; }
+  #popup .ent:first-child { border-top: 0; padding-top: 0; margin-top: 0; }
+  #popup h3 { margin: 0 0 2px; font-size: 15px; }
+  #popup .close { position: absolute; right: 8px; top: 4px; cursor: pointer; color: var(--muted); font-size: 18px; }
+  #popup table { border-collapse: collapse; width: 100%; font-size: 12px; margin-top: 4px; }
+  #popup td { padding: 1px 4px; border-top: 1px solid #333; }
+  #popup td:last-child { text-align: right; white-space: nowrap; color: var(--muted); }
+  #tip { position: absolute; z-index: 6; pointer-events: none; background: rgba(0,0,0,.85); color: #fff; padding: 2px 7px; border-radius: 3px; font-size: 12px; display: none; white-space: nowrap; }
+  #coords { position: absolute; right: 12px; bottom: 10px; background: rgba(0,0,0,.7); color: var(--muted); padding: 3px 8px; border-radius: 4px; font-size: 12px; z-index: 5; }
+  .legend span { display: inline-flex; align-items: center; gap: 4px; margin-right: 10px; }
+  .swatch { width: 10px; height: 10px; border-radius: 50%; border: 1px solid #000; display: inline-block; }
+</style>
+</head>
+<body>
+<canvas id="map"></canvas>
+<div id="panel">
+  <h1><a href="index.html" style="color:var(--accent)">Lost City</a> world map</h1>
+  <input type="text" id="find" placeholder="Find NPC, item or place..." autocomplete="off">
+  <div id="sugg"></div>
+  <div class="row">Level: <span id="levels"></span></div>
+  <div class="row">
+    <label><input type="checkbox" id="l-npc" checked><span class="swatch" style="background:var(--npc)"></span>NPCs</label>
+    <label><input type="checkbox" id="l-obj" checked><span class="swatch" style="background:var(--item)"></span>Ground items</label>
+    <label><input type="checkbox" id="l-fn" checked>Map icons</label>
+    <label><input type="checkbox" id="l-portal" checked><span class="swatch" style="background:#3ee6ff"></span>Entrances</label>
+    <label><input type="checkbox" id="l-rc" checked><span class="swatch" style="background:#c08cff"></span>Runecrafting</label>
+    <label><input type="checkbox" id="l-stand" checked><span class="swatch" style="background:#7ddc7d;border-radius:2px"></span>Resources</label>
+    <label><input type="checkbox" id="l-lab" checked>Labels</label>
+  </div>
+  <div class="row" id="backrow" style="display:none"><button id="back">&larr; Back to where you came from</button></div>
+  <div class="row">
+    <button id="zin">+</button><button id="zout">&minus;</button>
+  </div>
+  <div class="small">Drag to pan, scroll to zoom. Click a dot to expand it. Click an entrance to follow it: <span style="color:#3ee6ff">&darr; down</span>, <span style="color:#ffb347">&uarr; up</span>, <span style="color:#b8ff5c">&rarr; across</span>. Two-way ladders show both buttons.</div>
+  <div class="small" id="status"></div>
+</div>
+<div id="popup"><span class="close" id="popup-close">&times;</span><div id="popup-body"></div></div>
+<div id="tip"></div>
+<div id="coords"></div>
+<script src="data/map_data.js?v=1789367887"></script>
+<script src="assets/map.js?v=1789367887"></script>
+</body>
+</html>
