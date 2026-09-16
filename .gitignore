@@ -2,3 +2,7 @@
 source/
 __pycache__/
 *.pyc
+
+# a "Download ZIP" of LostCityRS/Server unpacked here for reference; not part of this repository
+Server-main/
+Server-main.zip
