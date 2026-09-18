@@ -1,10 +1,10 @@
 {
  "_generated": {
-  "content_commit": "0561dddd",
+  "content_commit": "0561ddd",
   "content_path": "source/content",
   "coordinates": "absolute world tiles {level,x,z}; 0_50_50_21_18 -> level 0, x 3221, z 3218",
   "covers": "woodcutting, mining, smelting, smithing, cooking (both the fire and the mixing before it), fletching (including headless and ogre arrows), firemaking, crafting (gems, leather, jewellery, spinning, pottery, glass, studded leather, battlestaves, dyed capes), fishing (including the big net table), herblore (identifying and brewing)",
-  "date": "2026-09-13",
+  "date": "2026-09-18",
   "not_covered": "runecrafting (see the wiki), magic; agility courses; quest-only recipes; wine fermenting, which happens on a timer rather than on a click; the second ingredient of a part-filled kebab bowl, which the content does not name; tanning and the Draynor dye-maker, which are NPC services with no level or xp and sit in item_sources.json instead",
   "revision": "254",
   "revision_date": "September 7, 2004",

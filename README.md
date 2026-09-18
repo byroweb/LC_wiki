@@ -159,6 +159,27 @@ also works in most browsers because every data file is a plain `.js` file.
   because Zanaris sits in the underground band of the Lumbridge Swamp square, so
   that chunk otherwise hands you a dragon weapon shop. The unlocked set lives in the URL, so a run can be
   shared. Data: `build/chunks.py` -> `site/data/chunks.js`.
+- `site/gear.html` - equipment builder. Click a slot to fill it, set your levels
+  and prayers, and the page works the fight out with the server's own combat
+  scripts: the equipment bonuses `~equip_get_bonuses` would add up, the attack
+  style table the weapon's category opens (Chop/Slash/Lunge/Block, Accurate/
+  Rapid/Longrange...), the attack rate in ticks (rapid takes one off), and the
+  max hit from `~combat_maxhit`. Pick a monster and it works out the damage a
+  second each way: a swing lands when `randominc(attack roll) > randominc(defence
+  roll)`, which over two uniform rolls is `a/(2(d+1))` when `a <= d` and
+  `(2a-d)/(2(a+1))` when it is not, and a hit that lands averages half the max.
+  Each monster's attack profile comes from walking its `[ai_opplayer2]` /
+  `[ai_applayer2]` handler and weighting the `random(n)` branches, so a dragon
+  is 1/4 dragonfire and 3/4 melee and the King Black Dragon splits three ways.
+  Dragonfire is modelled per dragon out of its own breath proc, including what
+  the anti-dragon shield, Protect from Magic and an antifire potion each take off
+  (green dragon: max 30, 50 when its roll beats your defence, 10 under the
+  prayer, 5 behind the shield, and 15 off any of those with the potion), so the
+  page can say 16.02 average damage a breath bare-headed and 2.50 behind the
+  shield. Where a handler branches on something that is not a die roll the shares
+  are split evenly and the monster is marked as such. The whole set-up lives in
+  the URL, so a build can be shared.
+  Data: `build/gear.py` -> `site/data/gear.js`.
 - `site/data/graph.json` - the raw knowledge graph (nodes + typed edges).
 
 ## What is in the knowledge graph

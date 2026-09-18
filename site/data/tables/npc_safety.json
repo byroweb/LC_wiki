@@ -1,10 +1,10 @@
 {
  "_generated": {
-  "content_commit": "0561dddd",
+  "content_commit": "0561ddd",
   "content_path": "source/content",
   "coordinates": "absolute world tiles {level,x,z}; 0_50_50_21_18 -> level 0, x 3221, z 3218",
   "covers": "every NPC config: attackable, aggressive and hunts (from its .hunt config and huntrange), the hunt checks by name with whether the block is a reconstruction, spawns inside the exact Wilderness zone, poison param, computed max hits, wander/max range, areas; random-event NPCs with behaviour flags read from their scripts",
-  "date": "2026-09-13",
+  "date": "2026-09-18",
   "not_covered": "magic max hits; an NPC whose hunt mode names a block no .hunt file defines gets aggressive=null",
   "revision": "254",
   "revision_date": "September 7, 2004",
