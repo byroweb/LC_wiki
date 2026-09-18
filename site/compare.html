@@ -1,0 +1,85 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Weapon comparison - Lost City Wiki</title><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="assets/style.css?v=1789714728"><script defer src="data/gear.js?v=1789714728"></script><script defer src="assets/combat.js?v=1789714728"></script><script defer src="assets/compare.js?v=1789714728"></script></head><body data-base=""><header class="top"><a class="brand" href="index.html">Lost City Wiki</a><nav><a href="map.html">World map</a><a href="graph.html">Knowledge graph</a><a href="chunks.html">Chunk picker</a><a href="gear.html">Equipment</a><a href="compare.html">Weapons</a><a href="npcs.html">NPCs</a><a href="items.html">Items</a><a href="areas.html">Areas</a><a href="quests.html">Quests</a><a href="shops.html">Shops</a><a href="tables.html">Drop tables</a></nav><div class="search"><input id="q" placeholder="Search the wiki..." autocomplete="off"><div class="results" id="q-results"></div></div></header><main><style>
+  .cmp-setups { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .cmp-panel { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 12px; }
+  .cmp-panel h3 { margin: 0 0 8px; display: flex; align-items: center; gap: 6px; }
+  .cmp-panel h3 .swatch { width: 11px; height: 11px; border-radius: 2px; display: inline-block; }
+  .sideA .swatch { background: var(--accent); }
+  .sideB .swatch { background: var(--link); }
+  .cmp-panel label { display: block; font-size: 12px; color: var(--muted); margin: 6px 0 2px; }
+  select, input[type=number] { width: 100%; padding: 5px 7px; background: var(--panel2); color: var(--text);
+            border: 1px solid var(--border); border-radius: 4px; font: inherit; }
+  .kit { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 6px 10px; }
+  .lv { display: grid; grid-template-columns: repeat(auto-fit, minmax(92px, 1fr)); gap: 6px 10px; }
+  .headline { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin: 10px 0 4px; }
+  .headline .box { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; }
+  .headline .box b { display: block; font-size: 22px; color: var(--accent); line-height: 1.25; }
+  .headline .box .sub2 { font-size: 11.5px; color: var(--muted); }
+  table.cmp { border-collapse: collapse; width: 100%; font-size: 13px; margin: 8px 0; }
+  table.cmp th, table.cmp td { border-bottom: 1px solid var(--border); padding: 4px 7px; text-align: right; }
+  table.cmp th { background: var(--panel2); color: #f5ecd0; text-align: right; position: sticky; top: 0; cursor: pointer; }
+  table.cmp th:first-child, table.cmp td:first-child { text-align: left; }
+  table.cmp th.on { color: var(--accent); }
+  .winA { color: var(--accent); font-weight: 600; }
+  .winB { color: var(--link); font-weight: 600; }
+  .tablewrap { max-height: 560px; overflow: auto; border: 1px solid var(--border); border-radius: 6px; }
+  .controls { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin: 8px 0; }
+  .controls input[type=text] { width: 220px; padding: 6px 9px; background: var(--panel2); color: var(--text);
+            border: 1px solid var(--border); border-radius: 4px; }
+  .controls label { font-size: 12.5px; color: var(--muted); }
+  .bar { height: 9px; background: var(--panel2); border-radius: 5px; overflow: hidden; display: flex; min-width: 90px; }
+  .bar i { display: block; height: 100%; }
+  .bar i.a { background: var(--accent); } .bar i.b { background: var(--link); }
+  .note { color: var(--muted); font-size: 12.5px; }
+  .warn { color: #ffb0a0; font-size: 12.5px; }
+  img.icon { width: 20px; height: 20px; }
+  @media (max-width: 760px) { .cmp-setups { grid-template-columns: 1fr; } }
+</style>
+
+<h1>Weapon comparison</h1>
+<div class="sub">Put two weapons against each other across every monster in the game. Speed, accuracy and
+max hit are worked out with the server's own combat scripts, so the answer is whatever the content says
+it is.</div>
+
+<div class="cmp-setups">
+  <div class="cmp-panel sideA">
+    <h3><span class="swatch"></span><span id="nameA">Weapon A</span></h3>
+    <label>Weapon</label><select id="wA"></select>
+    <label>Attack style</label><select id="sA"></select>
+    <div id="ammoA-wrap"><label>Ammunition</label><select id="ammoA"></select></div>
+  </div>
+  <div class="cmp-panel sideB">
+    <h3><span class="swatch"></span><span id="nameB">Weapon B</span></h3>
+    <label>Weapon</label><select id="wB"></select>
+    <label>Attack style</label><select id="sB"></select>
+    <div id="ammoB-wrap"><label>Ammunition</label><select id="ammoB"></select></div>
+  </div>
+</div>
+
+<div class="cmp-panel">
+  <h3>Shared levels, prayers and kit</h3>
+  <div class="lv" id="levels"></div>
+  <div class="lv" id="prayers" style="margin-top:8px"></div>
+  <label style="margin-top:10px">The rest of the set &mdash; worn by both sides, so it only shifts the
+    comparison through the bonuses it adds to each</label>
+  <div class="kit" id="kit"></div>
+  <div style="margin-top:8px"><button id="preset-clear">Nothing</button>
+    <button id="preset-melee">Melee kit</button>
+    <button id="preset-ranged">Ranged kit</button></div>
+</div>
+
+<h2>Head to head</h2>
+<div class="headline" id="headline"></div>
+<div id="decomp"></div>
+
+<h2>Every monster</h2>
+<div class="controls">
+  <input type="text" id="filter" placeholder="Filter monsters..." autocomplete="off">
+  <label><input type="checkbox" id="onlyB"> only where B wins</label>
+  <span class="note" id="tally"></span>
+</div>
+<div class="tablewrap"><table class="cmp" id="table"></table></div>
+<p class="note">Damage a second against each monster, both sides on the style chosen above, with the
+monster standing still and no food, prayer drain or special attacks. A monster's defence roll is
+<code>(defence level + 9) &times; (its defence bonus for that damage type + 64)</code>, which is what
+<code>~npc_defence_roll_specific</code> computes.</p>
+</main><footer>Generated from the LostCityRS <code>Content</code> repository, revision 254 (September 7, 2004). Game assets are the property of Jagex Ltd.</footer><script src="data/search.js?v=1789714728"></script><script src="assets/wiki.js?v=1789714728"></script></body></html>

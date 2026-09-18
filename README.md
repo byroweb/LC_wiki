@@ -180,6 +180,23 @@ also works in most browsers because every data file is a plain `.js` file.
   are split evenly and the monster is marked as such. The whole set-up lives in
   the URL, so a build can be shared.
   Data: `build/gear.py` -> `site/data/gear.js`.
+- `site/compare.html` - weapon comparison. Two weapons, a style each, one shared
+  kit, and the damage a second both deal to every monster in the game, sortable
+  and filterable. The head-to-head splits the answer into the two things that
+  decide it and usually pull opposite ways: **throughput**, the max-hit ratio
+  over the speed ratio, which is what a slower, harder-hitting weapon gives up
+  before accuracy is counted, and **accuracy**, the attack-roll ratio, which is
+  what it has to win back and which pays less the closer you already are to
+  hitting every swing. It then binary-searches the defence roll where the lead
+  changes hands. So a dragon longsword's strength bonus is worth exactly its
+  speed penalty - `(71+64)/(44+64)` is `135/108`, which is `1.25`, which is `5/4`
+  - leaving accuracy as its whole advantage over a rune scimitar, and the lead
+  flips on soft targets at high attack. A rune sword on stab only beats a rune
+  scimitar on slash when the monster's slash defence exceeds its stab defence by
+  about 6, which is most of the dragons; and since no item outside the weapon
+  slot has a different stab, slash or crush attack bonus, no kit can tilt any of
+  that. Both pages share their arithmetic through `build/static/combat.js` ->
+  `site/assets/combat.js` and read the same `site/data/gear.js`.
 - `site/data/graph.json` - the raw knowledge graph (nodes + typed edges).
 
 ## What is in the knowledge graph
