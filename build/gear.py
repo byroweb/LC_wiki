@@ -548,6 +548,60 @@ def build_spells(b, constants):
     return out
 
 
+def build_regen(b):
+    """[ticks, hitpoints] the health_regen timer restores, and the same under Rapid Heal.
+
+    `[timer,health_regen]` heals a flat amount; how often is the interval the
+    login script arms it with, and the Rapid Heal prayer re-arms it faster.
+    """
+    timer = b.blocks.get(('timer', 'health_regen'))
+    m = re.search(r'stat_heal\(hitpoints,\s*(\d+)', timer['body']) if timer else None
+    amount = int(m.group(1)) if m else 1
+    # the slowest arming is the ordinary one; Rapid Heal re-arms it faster
+    ticks = 0
+    for blk in b.blocks.values():
+        for v in re.findall(r'settimer\(health_regen,\s*(\d+)\)', blk['body']):
+            ticks = max(ticks, int(v))
+    if not ticks:
+        raise SystemExit('gear: no settimer(health_regen, ...) found - the regen rate needs updating')
+    return [ticks, amount]
+
+
+def _mark_variants(items):
+    """Flag the trimmed, gold and charged copies of an item the pages cannot tell apart.
+
+    A gold-trimmed rune platebody has exactly the stats of a plain one, so the
+    equipment pickers would otherwise list the same set three times over.  An
+    item is folded away only when its name carries a parenthetical *and* another
+    item exists that every number on these pages reads identically: the same
+    slot, covered slots, category, attack rate, level gate and all 13 bonuses.
+
+    That keeps anything the pages would treat differently, whatever its name --
+    a silver sickle(b) has +5 prayer over a plain one, and a bronze spear(p) has
+    a different stab bonus -- and it keeps every item whose name is its own, so
+    a Saradomin platebody stays listed beside the rune one it copies.  A group
+    with nothing but parenthetical names (rings of dueling, which differ only in
+    charges left) keeps its first member rather than vanishing entirely.
+
+    Poisoned weapons fold into their plain versions, because poison is not part
+    of what these pages work out.
+    """
+    groups = {}
+    for iid, rec in items.items():
+        key = (rec['s'], tuple(rec.get('c', ())), rec['r'], rec.get('lr', 0), tuple(rec['b']),
+               rec.get('cat') if rec['s'] == WEARPOS.index('righthand') else None)
+        groups.setdefault(key, []).append(iid)
+    folded = 0
+    for ids in groups.values():
+        plain = [i for i in ids if '(' not in items[i]['n']]
+        keep = min(plain or ids, key=lambda i: (len(items[i]['n']), items[i]['n'], i))
+        for i in ids:
+            if i != keep and '(' in items[i]['n']:
+                items[i]['dup'] = keep
+                folded += 1
+    return folded
+
+
 def _check_breath(b):
     """Re-read the dragonfire numbers out of their procs, so the table cannot go stale."""
     for key, spec in sorted(BREATHS.items()):
@@ -572,6 +626,7 @@ def build_gear_data(b):
     cat2table, style_tables, style_bonuses, default_style_bonus = build_styles(b, constants)
     reqs = build_requirements(b)
     prayers = build_prayers(b, constants)
+    regen = build_regen(b)
     spells = build_spells(b, constants)
 
     # ---- items
@@ -602,6 +657,7 @@ def build_gear_data(b):
         if lr:
             rec['lr'] = lr
         items[it['id']] = rec
+    _mark_variants(items)
 
     # ---- monsters
     walker = AttackWalker(b.blocks, spells)
@@ -658,6 +714,8 @@ def build_gear_data(b):
         # empty-handed swing takes ([label,player_melee_attack])
         'antifireShield': shield['id'] if shield else None,
         'unarmedRate': 4,
+        # [timer,health_regen]: this many hitpoints back every this many ticks
+        'regen': regen,
         'slots': [[i, WEARPOS[i], label] for i, label in SLOTS],
         'wearpos': WEARPOS,
         'bonusKeys': BONUS_KEYS,
@@ -677,5 +735,7 @@ def build_gear_data(b):
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, 'w', encoding='utf-8') as f:
         f.write('window.GEAR = ' + json.dumps(data, separators=(',', ':')) + ';\n')
-    return ('gear: %d equippable items, %d monsters (%d with an approximated attack profile), %d weapon style tables'
-            % (len(items), len(monsters), approx_count, len(style_tables)))
+    dups = sum(1 for r in items.values() if 'dup' in r)
+    return ('gear: %d equippable items (%d trimmed/charged copies folded away), %d monsters '
+            '(%d with an approximated attack profile), %d weapon style tables, %d hp per %d ticks'
+            % (len(items), dups, len(monsters), approx_count, len(style_tables), regen[1], regen[0]))

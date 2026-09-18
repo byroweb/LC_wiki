@@ -177,8 +177,18 @@ also works in most browsers because every data file is a plain `.js` file.
   prayer, 5 behind the shield, and 15 off any of those with the potion), so the
   page can say 16.02 average damage a breath bare-headed and 2.50 behind the
   shield. Where a handler branches on something that is not a die roll the shares
-  are split evenly and the monster is marked as such. The whole set-up lives in
-  the URL, so a build can be shared.
+  are split evenly and the monster is marked as such. "Until you drop" counts the
+  hitpoints `[timer,health_regen]` puts back (1 every 100 ticks), so anything
+  hitting for less than that never kills you. The whole set-up lives in the URL,
+  so a build can be shared.
+  The pickers leave out the trimmed, gold and charged copies of an item: a
+  gold-trimmed rune platebody has exactly the stats of a plain one, so listing
+  both only says the same thing twice. A copy is folded away only when its name
+  carries a parenthetical *and* another item reads identically on every number
+  these pages use, which keeps a silver sickle(b) (+5 prayer) and a bronze
+  spear(p) (a different stab bonus), and keeps every item whose name is its own,
+  so a Saradomin platebody stays listed beside the rune one it copies. Quest
+  requirements are recorded but not checked; only level gates are.
   Data: `build/gear.py` -> `site/data/gear.js`.
 - `site/compare.html` - weapon comparison. Two weapons, a style each, one shared
   kit, and the damage a second both deal to every monster in the game, sortable

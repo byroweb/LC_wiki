@@ -42,6 +42,16 @@ var CB = (function () {
 
   function item(id) { return id ? G.items[id] : null; }
 
+  /* The items a picker should offer for one slot: everything but the trimmed,
+   * gold and charged copies build/gear.py folded away, which carry identical
+   * stats and would just list the same set several times over. */
+  function slotItems(slot) {
+    var out = [];
+    for (var id in G.items) if (G.items[id].s === slot && !G.items[id].dup) out.push([id, G.items[id]]);
+    out.sort(function (x, y) { return x[1].n.localeCompare(y[1].n); });
+    return out;
+  }
+
   function ammoFits(weapon, ammo) {
     // ~equip_get_bonuses only counts the quiver's ranged strength when the ammo
     // suits the weapon (or when nothing is wielded at all)
@@ -151,7 +161,7 @@ var CB = (function () {
     STYLE_RANGED_RAPID: STYLE_RANGED_RAPID,
     DT_STAB: DT_STAB, DT_SLASH: DT_SLASH, DT_CRUSH: DT_CRUSH, DT_RANGED: DT_RANGED, DT_MAGIC: DT_MAGIC,
     effectiveStat: effectiveStat, combatStat: combatStat, combatMaxhit: combatMaxhit,
-    hitChance: hitChance, item: item, ammoFits: ammoFits, bonuses: bonuses,
+    hitChance: hitChance, item: item, slotItems: slotItems, ammoFits: ammoFits, bonuses: bonuses,
     styleRows: styleRows, attackRate: attackRate, playerStats: playerStats,
     playerDefenceRoll: playerDefenceRoll, npcDefenceRoll: npcDefenceRoll, dealt: dealt
   };
