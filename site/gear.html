@@ -1,0 +1,97 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Equipment builder - Lost City Wiki</title><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="assets/style.css?v=1789714728"><script defer src="data/gear.js?v=1789714728"></script><script defer src="assets/combat.js?v=1789714728"></script><script defer src="assets/gear.js?v=1789714728"></script></head><body data-base=""><header class="top"><a class="brand" href="index.html">Lost City Wiki</a><nav><a href="map.html">World map</a><a href="graph.html">Knowledge graph</a><a href="chunks.html">Chunk picker</a><a href="gear.html">Equipment</a><a href="compare.html">Weapons</a><a href="npcs.html">NPCs</a><a href="items.html">Items</a><a href="areas.html">Areas</a><a href="quests.html">Quests</a><a href="shops.html">Shops</a><a href="tables.html">Drop tables</a></nav><div class="search"><input id="q" placeholder="Search the wiki..." autocomplete="off"><div class="results" id="q-results"></div></div></header><main><style>
+  .gear-cols { display: grid; grid-template-columns: 300px 1fr; gap: 18px; align-items: start; }
+  .gear-panel { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 12px; }
+  .gear-panel h3 { margin: 0 0 8px; }
+  .slotgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; justify-items: center; }
+  .slot { width: 100%; min-height: 52px; background: var(--panel2); border: 1px solid var(--border); border-radius: 6px;
+          cursor: pointer; padding: 3px; text-align: center; color: var(--muted); font-size: 10.5px; line-height: 1.2;
+          display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
+  .slot:hover { border-color: var(--accent); color: var(--text); }
+  .slot.filled { color: var(--text); background: #343026; }
+  .slot img { width: 28px; height: 28px; image-rendering: pixelated; }
+  .slot .nm { display: block; max-width: 84px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .slot.empty-cell { visibility: hidden; cursor: default; }
+  .lv { display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: 6px; }
+  .lv label { display: flex; align-items: center; gap: 5px; font-size: 12.5px; color: var(--muted); }
+  .lv input { width: 52px; padding: 4px 6px; background: var(--panel2); color: var(--text); border: 1px solid var(--border); border-radius: 4px; }
+  .prayrow { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 6px; }
+  .prayrow label { font-size: 12.5px; color: var(--muted); display: block; }
+  select, .gear-panel button, #picker button, .styletabs button { background: var(--panel2); color: var(--text);
+          border: 1px solid var(--border); border-radius: 4px; padding: 4px 9px; cursor: pointer; }
+  select { width: 100%; }
+  .styletabs button { margin: 0 4px 4px 0; }
+  .styletabs button.on { background: var(--accent); color: #000; border-color: var(--accent); }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 10px 0; }
+  .stats .box { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; }
+  .stats .box b { display: block; font-size: 23px; color: var(--accent); line-height: 1.25; }
+  .stats .box .sub2 { font-size: 11.5px; color: var(--muted); }
+  .bonusgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; }
+  .bonusgrid table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .bonusgrid td { border-top: 1px solid var(--border); padding: 3px 4px; }
+  .bonusgrid td:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+  .pos { color: #9be59b; } .neg { color: #ffb0a0; }
+  #picker { position: fixed; inset: 0; background: rgba(0,0,0,.66); z-index: 40; display: none; }
+  #picker.on { display: block; }
+  #pickbox { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(560px, 94vw);
+             max-height: 80vh; background: var(--panel); border: 1px solid var(--border); border-radius: 8px;
+             padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+  #pickbox input { width: 100%; padding: 7px 9px; background: var(--panel2); color: var(--text); border: 1px solid var(--border); border-radius: 4px; }
+  #picklist { overflow: auto; border: 1px solid var(--border); border-radius: 4px; }
+  #picklist div.row { display: flex; align-items: center; gap: 8px; padding: 4px 8px; cursor: pointer; border-bottom: 1px solid #333; }
+  #picklist div.row:hover { background: var(--panel2); }
+  #picklist img { width: 24px; height: 24px; image-rendering: pixelated; }
+  #picklist .b { margin-left: auto; font-size: 11.5px; color: var(--muted); white-space: nowrap; }
+  #picklist .req { color: #ffb0a0; }
+  .msearch { position: relative; max-width: 460px; }
+  .msearch input { width: 100%; padding: 8px 10px; background: var(--panel2); color: var(--text); border: 1px solid var(--border); border-radius: 4px; }
+  #msugg { position: absolute; left: 0; right: 0; top: 38px; max-height: 300px; overflow: auto; background: var(--panel);
+           border: 1px solid var(--border); border-radius: 4px; display: none; z-index: 15; }
+  #msugg div { padding: 5px 9px; cursor: pointer; border-bottom: 1px solid #333; }
+  #msugg div:hover, #msugg div.sel { background: var(--panel2); }
+  .warn { color: #ffb0a0; }
+  @media (max-width: 800px) { .gear-cols { grid-template-columns: 1fr; } }
+</style>
+
+<h1>Equipment builder</h1>
+<div class="sub">Put a set together, see what it swings at and hits for, then point it at something and
+watch the damage go both ways. Every number is worked out with the server's own combat scripts.</div>
+
+<div class="gear-cols">
+  <div class="gear-panel">
+    <h3>Equipment</h3>
+    <div class="slotgrid" id="slots"></div>
+    <div style="margin-top:10px">
+      <button id="clear">Clear all</button>
+      <label class="small" style="display:block;margin-top:8px"><input type="checkbox" id="f2p"> Free-to-play items only</label>
+    </div>
+  </div>
+  <div class="gear-panel">
+    <h3>Your levels</h3>
+    <div class="lv" id="levels"></div>
+    <h3 style="margin-top:14px">Prayers</h3>
+    <div class="prayrow" id="prayers"></div>
+    <h3 style="margin-top:14px">Potions</h3>
+    <label class="small"><input type="checkbox" id="antifire"> Antifire potion (<code>%dragonresist</code>)</label>
+  </div>
+</div>
+
+<h2>Equipment bonuses</h2>
+<div class="bonusgrid" id="bonuses"></div>
+
+<h2>Attack style, speed and max hit</h2>
+<div class="styletabs" id="styles"></div>
+<div id="attack"></div>
+
+<h2>Against a monster</h2>
+<div class="msearch">
+  <input type="text" id="mfind" placeholder="Search a monster (Green dragon, Hill giant, Guard...)" autocomplete="off">
+  <div id="msugg"></div>
+</div>
+<div id="fight"></div>
+
+<div id="picker"><div id="pickbox">
+  <div><b id="picktitle">Choose an item</b> <button id="pickclose" style="float:right">Close</button></div>
+  <input type="text" id="pickfind" placeholder="Filter..." autocomplete="off">
+  <div id="picklist"></div>
+</div></div>
+</main><footer>Generated from the LostCityRS <code>Content</code> repository, revision 254 (September 7, 2004). Game assets are the property of Jagex Ltd.</footer><script src="data/search.js?v=1789714728"></script><script src="assets/wiki.js?v=1789714728"></script></body></html>

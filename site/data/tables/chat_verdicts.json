@@ -1,10 +1,10 @@
 {
  "_generated": {
-  "content_commit": "0561dddd",
+  "content_commit": "0561ddd",
   "content_path": "source/content",
   "coordinates": "absolute world tiles {level,x,z}; 0_50_50_21_18 -> level 0, x 3221, z 3218",
   "covers": "every mes()/~mesbox()/~objbox() string in the scripts plus the displaymessage enum, classified by regex into categories",
-  "date": "2026-09-13",
+  "date": "2026-09-18",
   "not_covered": "npc_say / chatnpc dialogue lines; strings built entirely at runtime",
   "revision": "254",
   "revision_date": "September 7, 2004",
