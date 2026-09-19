@@ -189,11 +189,14 @@ also works in most browsers because every data file is a plain `.js` file.
   An **optimise** button fills the slots with the best set you could wear against
   the chosen monster, for most damage dealt, least damage taken, or the best of
   both. It is an exact search rather than a ranking of bonuses, which matters in
-  two ways. Only the amulet, gloves and boots carry any melee attack or strength
-  bonus -- head, cape, body, shield, legs and ring are purely defensive, and no
-  body in the game touches your damage at all -- so every other slot is a
-  straight pick and only the few that trade offence against defence get
-  enumerated. And every candidate is scored on the damage it actually produces,
+  two ways. Which slots can trade offence against defence depends on how you are
+  fighting, so it is worked out per damage type rather than assumed: swinging a
+  weapon only the amulet, gloves and boots carry any melee attack or strength
+  bonus and no body in the game touches your damage at all, but drawing a bow
+  nearly every slot does -- 21 helmets, 17 bodies and 23 pairs of legs carry
+  ranged attack, which is why dragonhide is worth wearing over rune. Only the
+  cape and the ring are purely defensive either way. The slots that cannot trade
+  are a straight pick; only the ones that can get enumerated. And every candidate is scored on the damage it actually produces,
   because an anti-dragon shield gives up 43 points of defence and still cuts what
   a green dragon does by three quarters: the best shield is not the one with the
   best bonus. A **safespotted** toggle takes the monster's melee away and leaves

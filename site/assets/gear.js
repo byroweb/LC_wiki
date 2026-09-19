@@ -177,11 +177,16 @@ function fight(mon, ps) {
 
 // ------------------------------------------------------------------ optimising
 //
-// Only the amulet, gloves and boots carry any melee attack or strength bonus --
-// head, cape, body, shield, legs and ring are purely defensive, and no body in
-// the game touches your damage at all.  So the search splits: a handful of
-// slots trade offence against defence and need enumerating, the rest are a
-// straight pick of the best defence against what this monster throws.
+// Which slots can trade offence against defence depends on how you are
+// fighting, so the split is worked out per damage type rather than assumed.
+// Swinging a weapon, only the amulet, gloves and boots carry any melee attack
+// or strength bonus, and no body in the game touches your damage at all.
+// Drawing a bow, nearly every slot does -- 21 helmets, 17 bodies and 23 pairs
+// of legs carry ranged attack -- which is why dragonhide is worth wearing over
+// rune despite the defence it gives up.  Only the cape and the ring are purely
+// defensive either way.  So the search splits: slots that trade offence against
+// defence get enumerated, the rest are a straight pick of the best defence
+// against what this monster throws.
 //
 // The shield is the exception that stops this being a bonus-ranking exercise.
 // An anti-dragon shield gives up 43 points of defence and still cuts the damage
@@ -259,11 +264,12 @@ function optimise(mode) {
       });
       var lists = slots.map(function (sl) { return [sl, cached(sl, dt, monDt, ranged, weapon)]; });
       if (lists.some(function (pair) { return !pair[1].length; })) return;
-      // A slot whose items all carry the same offence (which is most of them --
-      // head, cape, body, legs and ring have none at all) cannot trade one
-      // against the other, so its best defence is simply its best choice and it
-      // never needs enumerating.  Only the few that vary, and the shield with
-      // its anti-dragon case, go into the cross product.
+      // A slot whose items all carry the same offence cannot trade one against
+      // the other, so its best defence is simply its best choice and it never
+      // needs enumerating.  Which slots those are falls out of the candidate
+      // lists above, so it is most of them on a melee style and few of them on
+      // a ranged one.  The rest, and the shield with its anti-dragon case, go
+      // into the cross product.
       var base = {}, varying = [];
       lists.forEach(function (pair) {
         var cs = pair[1];
