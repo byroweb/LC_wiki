@@ -619,56 +619,91 @@ def _attack_entry(r, spells):
     return e
 
 
-def _mark_variants(items):
-    """Flag the trimmed, gold and charged copies of an item the pages cannot tell apart.
+def _mark_variants(items, cfgnames):
+    """Fold away the copies of an item these pages cannot tell apart.
 
-    A gold-trimmed rune platebody has exactly the stats of a plain one, so the
-    equipment pickers would otherwise list the same set three times over.  An
-    item is folded away when another item exists that every number on these
-    pages reads identically -- the same slot, covered slots, category, attack
-    rate, level gate, requirements and all 13 bonuses -- and it is either a
-    parenthetical variant of that item or carries the very same display name.
-    The requirements have to be part of that: a Hazeel Cult death dagger has
-    exactly the stats of a black dagger and needs no attack level for it, so
-    without them the real black dagger folds into a quest item.  The second case
-    is the seven coloured capes and the eighteen chompy bird hats, which the
-    content names alike and the pages cannot tell apart at all.
+    The content names a variant after the item it copies: a gold-trimmed rune
+    platebody is `rune_platebody_gold`, a Saradomin one is
+    `rune_platebody_saradomin`, a poisoned iron dagger is `iron_dagger_p`.  So
+    the first and best test is that naming -- an item whose config name is
+    another item's config name plus a suffix, and which reads identically to it
+    on every number these pages use, is that item in another colour and folds
+    into it.  God armour is exactly this: the four platebodies of Saradomin,
+    Guthix, Zamorak and rune are one item with four recolours, down to the
+    weight and the 65,000gp.
 
-    That keeps anything the pages would treat differently, whatever its name --
-    a silver sickle(b) has +5 prayer over a plain one, and a bronze spear(p) has
-    a different stab bonus -- and it keeps every item whose name is its own, so
-    a Saradomin platebody stays listed beside the rune one it copies.  A group
-    with nothing but parenthetical names (rings of dueling, which differ only in
-    charges left) keeps its first member rather than vanishing entirely.
+    Taking the base from the config name rather than guessing at the display
+    names also gets the survivor right.  Picking the shortest name instead left
+    the trimmed rune kiteshields folded into "Saradomin kite", which is two
+    characters shorter than "Rune kiteshield" and not the item anybody means.
 
-    Poisoned weapons fold into their plain versions, because poison is not part
-    of what these pages work out.
+    A second pass catches what the naming does not: within a stats group, items
+    whose display names differ only by a parenthetical fold together -- the
+    seven coloured capes, the eighteen chompy bird hats, the eight rings of
+    dueling.  It has to go by that stem and not by the stats alone, because a
+    stats group is only as specific as its numbers: every item with no bonuses
+    at all shares one, so a ring of dueling would otherwise fold into a sapphire
+    ring and chompy hats into party hats.
+
+    Every pass needs the two items to read identically on the same terms: the
+    slot, covered slots, category, attack rate, level gate, requirements and all
+    13 bonuses.  The requirements have to be in there -- a Hazeel Cult death
+    dagger has exactly the stats of a black dagger and needs no attack level for
+    it, so leaving them out folds the real black dagger into a quest item -- and
+    what the pages would treat differently is kept whatever its name, so a
+    silver sickle(b) (+5 prayer) and a bronze spear(p) (a different stab bonus)
+    both stay.  A group of nothing but parenthetical names (rings of dueling,
+    which differ only in charges left) keeps its first member rather than
+    vanishing entirely.
     """
-    groups = {}
-    for iid, rec in items.items():
-        key = (rec['s'], tuple(rec.get('c', ())), rec['r'], rec.get('lr', 0), tuple(rec['b']),
-               json.dumps(rec.get('req'), sort_keys=True),
-               rec.get('cat') if rec['s'] == WEARPOS.index('righthand') else None)
-        groups.setdefault(key, []).append(iid)
+    def reads(iid):
+        rec = items[iid]
+        return (rec['s'], tuple(rec.get('c', ())), rec['r'], rec.get('lr', 0), tuple(rec['b']),
+                json.dumps(rec.get('req'), sort_keys=True), rec.get('w', 0),
+                rec.get('cat') if rec['s'] == WEARPOS.index('righthand') else None)
+
     folded = 0
-    for ids in groups.values():
-        plain = [i for i in ids if '(' not in items[i]['n']]
-        keep = min(plain or ids, key=lambda i: (len(items[i]['n']), items[i]['n'], i))
-        for i in ids:
-            if i != keep and '(' in items[i]['n']:
-                items[i]['dup'] = keep
+
+    # 1. a config name that is another item's plus a suffix
+    by_cfg = {}
+    for iid, name in cfgnames.items():
+        by_cfg.setdefault(name, iid)
+    for iid, name in cfgnames.items():
+        parts = name.split('_')
+        for cut in range(len(parts) - 1, 0, -1):
+            base = by_cfg.get('_'.join(parts[:cut]))
+            if base is None or base == iid:
+                continue
+            if reads(base) == reads(iid):
+                items[iid]['dup'] = base
                 folded += 1
-        # What is left can still hold several items the content names alike --
-        # a stats group is only as specific as its numbers, so every hat with no
-        # bonuses at all shares one, chompy hats and party hats together.  Those
-        # are different items and each keeps its place; it is only the copies
-        # carrying the very same name that collapse into one.
-        rest = [i for i in ids if 'dup' not in items[i]]
-        first = {}
-        for i in sorted(rest, key=lambda i: (len(items[i]['n']), items[i]['n'], i)):
-            same = first.setdefault(items[i]['n'], i)
-            if i != same:
-                items[i]['dup'] = same
+            break
+    # a variant of a variant points at whatever survived
+    for iid in items:
+        seen = set()
+        while items[iid].get('dup') in items and items[items[iid]['dup']].get('dup') is not None:
+            if items[iid]['dup'] in seen:
+                break
+            seen.add(items[iid]['dup'])
+            items[iid]['dup'] = items[items[iid]['dup']]['dup']
+
+    # 2. what the naming missed: same stats, and a display name that differs
+    #    only by a parenthetical
+    def stem(name):
+        return re.sub(r'\s*\([^)]*\)\s*$', '', name).strip().lower()
+
+    groups = {}
+    for iid in items:
+        if 'dup' not in items[iid]:
+            groups.setdefault((reads(iid), stem(items[iid]['n'])), []).append(iid)
+    for ids in groups.values():
+        if len(ids) < 2:
+            continue
+        plain = [i for i in ids if '(' not in items[i]['n']]
+        keep = min(plain or ids)                      # the base item is the older id
+        for i in ids:
+            if i != keep:
+                items[i]['dup'] = keep
                 folded += 1
     return folded
 
@@ -692,6 +727,9 @@ def _disambiguate(items, cfgnames):
         if len(ids) < 2:
             continue
         said = set(re.findall(r'[a-z]+', name.lower()))
+        # tokens every member carries say nothing about which one this is
+        shared = set.intersection(*[set(cfgnames[i].split('_')) for i in ids])
+        said |= shared
         # a monk's robe top and bottom share their name and differ only in where
         # they go, and the slot says that far better than the config name does
         slots = [items[i]['s'] for i in ids]
@@ -803,7 +841,7 @@ def build_gear_data(b):
             rec['oa'] = 1            # fires ogre arrows and refuses ordinary ones
         items[it['id']] = rec
         cfgnames[it['id']] = it['name']
-    _mark_variants(items)
+    _mark_variants(items, cfgnames)
     renamed = _disambiguate(items, cfgnames)
 
     # ---- monsters

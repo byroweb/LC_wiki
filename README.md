@@ -226,16 +226,30 @@ also works in most browsers because every data file is a plain `.js` file.
   bow does the reverse.
   Items whose every bonus is 255 are placeholders in the content rather than
   gear, and are left out.
-  The pickers leave out the trimmed, gold and charged copies of an item: a
+  The pickers leave out the copies of an item these pages cannot tell apart: a
   gold-trimmed rune platebody has exactly the stats of a plain one, so listing
-  both only says the same thing twice. A copy is folded away only when its name
-  carries a parenthetical *and* another item reads identically on every number
-  these pages use, which keeps a silver sickle(b) (+5 prayer) and a bronze
-  spear(p) (a different stab bonus), and keeps every item whose name is its own,
-  so a Saradomin platebody stays listed beside the rune one it copies. The
-  requirements are part of that test: a Hazeel Cult death dagger has exactly the
-  stats of a black dagger and needs no attack level for it, so leaving them out
-  folds the real black dagger into a quest item. What is left sharing a name is
+  both only says the same thing twice. The content names a variant after the
+  item it copies -- `rune_platebody_gold`, `rune_platebody_saradomin`,
+  `iron_dagger_p` -- so that naming is the test: an item whose config name is
+  another's plus a suffix, and which reads identically to it on every number
+  these pages use, folds into it. **God armour is exactly this.** The platebodies
+  of Saradomin, Guthix and Zamorak are `rune_platebody_*` and match the rune one
+  to the last number, weight and 65,000gp included, so all twelve pieces fold
+  into the four rune ones. Taking the base from the config name also gets the
+  survivor right, where guessing from display names did not: the trimmed rune
+  kiteshields used to fold into "Saradomin kite", whose name is two characters
+  shorter. A second pass folds names differing only by a parenthetical within one
+  stats group -- the coloured capes, the chompy bird hats, the eight rings of
+  dueling -- and goes by that stem rather than the stats alone, or a ring of
+  dueling would fold into a sapphire ring. What survives is what the pages would
+  read differently: a silver sickle(b) (+5 prayer), a bronze spear(p) (a
+  different stab bonus), the four elemental battlestaves (one model, one set of
+  numbers, four different runes), and both pairs of boots of lightness, whose
+  worn version is the one item in the content with a negative `weight=` and so is
+  10lb lighter than the pair it otherwise matches. The requirements are part of
+  the test too: a Hazeel Cult death dagger has exactly the stats of a black
+  dagger and needs no attack level for it, so leaving them out folds the real
+  black dagger into a quest item. What is left sharing a name is
   qualified instead of folded, since it differs in ways the pages do read: the
   content calls all four dragonhide bodies "Dragonhide body" and tells them apart
   by recolour, so the picker says (blue), (red) and (black) and they need ranged
