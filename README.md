@@ -158,7 +158,12 @@ also works in most browsers because every data file is a plain `.js` file.
   only" toggle drops members items from the whole calculation, which matters
   because Zanaris sits in the underground band of the Lumbridge Swamp square, so
   that chunk otherwise hands you a dragon weapon shop. The unlocked set lives in the URL, so a run can be
-  shared. Data: `build/chunks.py` -> `site/data/chunks.js`.
+  shared, and it is also kept in the browser so following a link off the page and coming back does not lose
+  it. A shared link wins over your own run and only replaces it once you change something; Reset clears the
+  set outright, spawn chunk included, and that empty state is what you come back to. Reset clears the ticks
+  as well, so a new run does not start with the last one's items already crossed off; "clear ticks" still
+  clears just those.
+  Data: `build/chunks.py` -> `site/data/chunks.js`.
 - `site/gear.html` - equipment builder. Click a slot to fill it, set your levels
   and prayers, and the page works the fight out with the server's own combat
   scripts: the equipment bonuses `~equip_get_bonuses` would add up, the attack

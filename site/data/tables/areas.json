@@ -4,7 +4,7 @@
   "content_path": "source/content",
   "coordinates": "absolute world tiles {level,x,z}; 0_50_50_21_18 -> level 0, x 3221, z 3218",
   "covers": "map labels (heuristic squares), coord_pair zones from db rows (exact), banks (booth bounding boxes), resource and npc stands (cluster bounding boxes)",
-  "date": "2026-09-18",
+  "date": "2026-09-19",
   "not_covered": "exact town boundaries (the content has none); indoor rooms",
   "revision": "254",
   "revision_date": "September 7, 2004",
