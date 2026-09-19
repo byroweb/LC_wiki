@@ -184,7 +184,18 @@ also works in most browsers because every data file is a plain `.js` file.
   shield. Where a handler branches on something that is not a die roll the shares
   are split evenly and the monster is marked as such. "Until you drop" counts the
   hitpoints `[timer,health_regen]` puts back (1 every 100 ticks), so anything
-  hitting for less than that never kills you. The whole set-up lives in the URL,
+  hitting for less than that never kills you. **Hitpoints a kill** is what the
+  fight actually costs -- the damage taken less the regen over the same stretch,
+  times the time to kill -- which is the number behind "is the defence level for
+  better armour worth it": kill it fast enough and the armour buys nothing. It
+  reads `n/a` where there is no kill to average over, either because you drop
+  first or because the set cannot hurt it at all. A green dragon at attack and
+  strength 60 with a rune scimitar and an anti-dragon shield shows the shape of
+  it: `n/a` at defence 1 and at defence 20 in black, 33.5 hitpoints a kill once
+  rune goes on at 40, 28.3 at 60 and 25.5 at 80 -- the first forty levels turn
+  dying into killing and the next forty are worth eight hitpoints. Every figure
+  is an expected value, so a run of bad rolls can still end a trip the average
+  says was safe. The whole set-up lives in the URL,
   so a build can be shared.
   An **optimise** button fills the slots with the best set you could wear against
   the chosen monster, for most damage dealt, least damage taken, or the best of
