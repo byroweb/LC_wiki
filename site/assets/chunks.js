@@ -28,6 +28,38 @@
   var TICK_KEY = 'ls_chunk_ticked', ticked = {}, lastHave = {};
   try { ticked = JSON.parse(localStorage.getItem(TICK_KEY) || '{}') || {}; } catch (e) { ticked = {}; }
   function saveTicks() { try { localStorage.setItem(TICK_KEY, JSON.stringify(ticked)); } catch (e) {} }
+
+  // ---- the run in progress, kept in this browser
+  //
+  // The unlocked set already lives in the URL so a run can be shared, but the
+  // hash only survives a reload -- follow a link to an item page and come back
+  // and it is gone.  So the run is also written here on every change and read
+  // back when the page opens without one in the URL.  A shared link therefore
+  // still wins over your own run, and only overwrites it once you actually
+  // change something, at which point the link has become the run you are on.
+  var RUN_KEY = 'ls_chunk_run', RUN_VERSION = 1;
+  function saveRun() {
+    try {
+      localStorage.setItem(RUN_KEY, JSON.stringify({
+        v: RUN_VERSION, c: Array.from(state.unlocked).sort(),
+        x: Math.round(state.cx), z: Math.round(state.cz), zoom: +state.zoom.toFixed(2),
+        level: state.level, under: state.under
+      }));
+    } catch (e) {}
+  }
+  function loadRun() {
+    var r;
+    try { r = JSON.parse(localStorage.getItem(RUN_KEY) || 'null'); } catch (e) { r = null; }
+    if (!r || r.v !== RUN_VERSION || !Array.isArray(r.c)) return false;
+    // a chunk key can disappear when the content is rebuilt, so check each one
+    state.unlocked = new Set(r.c.filter(function (ck) { return ck in D.chunks; }));
+    if (typeof r.x === 'number') state.cx = r.x;
+    if (typeof r.z === 'number') state.cz = r.z;
+    if (typeof r.zoom === 'number') state.zoom = Math.max(0.25, Math.min(8, r.zoom));
+    if (typeof r.level === 'number') state.level = r.level;
+    state.under = !!r.under;
+    return true;
+  }
   var lastFight = [], lastTasks = [];
   function tickCount() {
     return Object.keys(lastHave).filter(function (i) { return ticked[i]; }).length +
@@ -591,7 +623,13 @@
   renderLevels();
   document.getElementById('zin').onclick = function () { state.zoom = Math.min(8, state.zoom * 1.5); draw(); };
   document.getElementById('zout').onclick = function () { state.zoom = Math.max(0.25, state.zoom / 1.5); draw(); };
-  document.getElementById('reset').onclick = function () { state.unlocked = new Set([START]); go(START); };
+  document.getElementById('reset').onclick = function () {
+    // clears the spawn chunk too, so reset really does leave nothing selected.
+    // go() syncs, which saves the empty run: forgetting it instead would let the
+    // next load fall back to the default and put the spawn chunk straight back.
+    state.unlocked = new Set();
+    go(START);
+  };
   document.getElementById('rand').onclick = function () {
     var pool = Object.keys(D.chunks).filter(function (ck) {
       return !state.unlocked.has(ck) && hasContent(ck);
@@ -637,10 +675,11 @@
   });
 
   // ---- hash: #c=50_50,49_50&x=..&z=..&zoom=..
-  function updateHash() {
+  function writeHash() {
     history.replaceState(null, '', '#c=' + Array.from(state.unlocked).sort().join(',') +
       '&x=' + Math.round(state.cx) + '&z=' + Math.round(state.cz) + '&zoom=' + state.zoom.toFixed(2));
   }
+  function updateHash() { saveRun(); writeHash(); }
   function readHash() {
     var h = {};
     location.hash.replace(/^#/, '').split('&').forEach(function (kv) { var p = kv.split('='); if (p[0]) h[p[0]] = decodeURIComponent(p[1] || ''); });
@@ -651,7 +690,14 @@
   }
 
   window.addEventListener('hashchange', function () { readHash(); render(); draw(); });
+  // a shared link (or a reload) carries the set; without one, resume where you left off
+  var hadHash = /(^|&)c=/.test(location.hash.replace(/^#/, ''));
   readHash();
+  if (!hadHash) loadRun();
   resize();
   render();
+  // write the hash so the run is shareable straight away, but do not save on the
+  // way in: opening someone else's link should not overwrite your own run until
+  // you change something, which is when it becomes the run you are on
+  hadHash ? writeHash() : updateHash();
 })();

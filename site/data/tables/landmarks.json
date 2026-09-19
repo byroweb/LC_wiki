@@ -4,7 +4,7 @@
   "content_path": "source/content",
   "coordinates": "absolute world tiles {level,x,z}; 0_50_50_21_18 -> level 0, x 3221, z 3218",
   "covers": "bank booths with stand tiles, ladders/stairs/trapdoors/caves with destinations, doors and gates with requirements, NPCs whose dialogue transports you, skill stations",
-  "date": "2026-09-18",
+  "date": "2026-09-19",
   "not_covered": "shop doors (use the vendor spawn in shops.gen.json); agility shortcuts without teleports",
   "revision": "254",
   "revision_date": "September 7, 2004",
