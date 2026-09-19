@@ -186,14 +186,75 @@ also works in most browsers because every data file is a plain `.js` file.
   hitpoints `[timer,health_regen]` puts back (1 every 100 ticks), so anything
   hitting for less than that never kills you. The whole set-up lives in the URL,
   so a build can be shared.
-  The pickers leave out the trimmed, gold and charged copies of an item: a
+  An **optimise** button fills the slots with the best set you could wear against
+  the chosen monster, for most damage dealt, least damage taken, or the best of
+  both. It is an exact search rather than a ranking of bonuses, which matters in
+  two ways. Which slots can trade offence against defence depends on how you are
+  fighting, so it is worked out per damage type rather than assumed: swinging a
+  weapon only the amulet, gloves and boots carry any melee attack or strength
+  bonus and no body in the game touches your damage at all, but drawing a bow
+  nearly every slot does -- 21 helmets, 17 bodies and 23 pairs of legs carry
+  ranged attack, which is why dragonhide is worth wearing over rune. Only the
+  cape and the ring are purely defensive either way. The slots that cannot trade
+  are a straight pick; only the ones that can get enumerated. And every candidate is scored on the damage it actually produces,
+  because an anti-dragon shield gives up 43 points of defence and still cuts what
+  a green dragon does by three quarters: the best shield is not the one with the
+  best bonus. Sets the fight cannot separate are settled by what they **weigh**,
+  from each obj's own `weight=`: a rune chainbody stops nearly what a platebody
+  does for 7lb and 15,000gp less, and against the 248 monsters that attack with
+  crush it stops more, because a chainbody's crush defence beats a platebody's
+  (+78 against +72) even as its stab and ranged defence fall short. Weight is a
+  tiebreak rather than a fourth axis of the search: almost every item weighs
+  something different, so treating it as one leaves nothing dominated and the
+  search goes from 0.2s to 15s. A tie is settled in order -- the objective, then
+  the combat axis the mode is not looking at, then weight -- because "most damage
+  dealt" ignores damage taken, and going straight to weight there would drop the
+  anti-dragon shield for a set that deals the same and takes four times as much.
+  How much run energy the weight costs is engine-side, so the page reports the
+  weight and does not put a number on the walk back. A **safespotted** toggle takes the monster's melee away and leaves
+  only what its `[ai_applayer2]` handler can reach you with, which for most of
+  them -- the green, blue, red and black dragons included, whose range handlers
+  are commented out in the content -- is nothing at all. Elvarg and the King
+  Black Dragon do have one and still breathe on you. The weapon's `attackrange`
+  is reported alongside, since a knife reaching 4 tiles is a different
+  proposition to a shortbow reaching 7.
+  A bow only shoots what `[proc,player_ranged_check_ammo]` lets it: with an empty
+  quiver, with the wrong kind of ammunition, or with arrows it is not powerful
+  enough for, the proc returns null and the caller answers `p_stopaction`, so the
+  set deals **nothing** rather than less. The ogre bow is the exception the proc
+  singles out -- it takes ogre arrows and refuses ordinary ones, and every other
+  bow does the reverse.
+  Items whose every bonus is 255 are placeholders in the content rather than
+  gear, and are left out.
+  The pickers leave out the copies of an item these pages cannot tell apart: a
   gold-trimmed rune platebody has exactly the stats of a plain one, so listing
-  both only says the same thing twice. A copy is folded away only when its name
-  carries a parenthetical *and* another item reads identically on every number
-  these pages use, which keeps a silver sickle(b) (+5 prayer) and a bronze
-  spear(p) (a different stab bonus), and keeps every item whose name is its own,
-  so a Saradomin platebody stays listed beside the rune one it copies. Quest
-  requirements are recorded but not checked; only level gates are.
+  both only says the same thing twice. The content names a variant after the
+  item it copies -- `rune_platebody_gold`, `rune_platebody_saradomin`,
+  `iron_dagger_p` -- so that naming is the test: an item whose config name is
+  another's plus a suffix, and which reads identically to it on every number
+  these pages use, folds into it. **God armour is exactly this.** The platebodies
+  of Saradomin, Guthix and Zamorak are `rune_platebody_*` and match the rune one
+  to the last number, weight and 65,000gp included, so all twelve pieces fold
+  into the four rune ones. Taking the base from the config name also gets the
+  survivor right, where guessing from display names did not: the trimmed rune
+  kiteshields used to fold into "Saradomin kite", whose name is two characters
+  shorter. A second pass folds names differing only by a parenthetical within one
+  stats group -- the coloured capes, the chompy bird hats, the eight rings of
+  dueling -- and goes by that stem rather than the stats alone, or a ring of
+  dueling would fold into a sapphire ring. What survives is what the pages would
+  read differently: a silver sickle(b) (+5 prayer), a bronze spear(p) (a
+  different stab bonus), the four elemental battlestaves (one model, one set of
+  numbers, four different runes), and both pairs of boots of lightness, whose
+  worn version is the one item in the content with a negative `weight=` and so is
+  10lb lighter than the pair it otherwise matches. The requirements are part of
+  the test too: a Hazeel Cult death dagger has exactly the stats of a black
+  dagger and needs no attack level for it, so leaving them out folds the real
+  black dagger into a quest item. What is left sharing a name is
+  qualified instead of folded, since it differs in ways the pages do read: the
+  content calls all four dragonhide bodies "Dragonhide body" and tells them apart
+  by recolour, so the picker says (blue), (red) and (black) and they need ranged
+  50, 60 and 70. Quest requirements are recorded but not checked; only level
+  gates are.
   Data: `build/gear.py` -> `site/data/gear.js`.
 - `site/compare.html` - weapon comparison. Two weapons, a style each, one shared
   kit, and the damage a second both deal to every monster in the game, sortable

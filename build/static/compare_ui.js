@@ -98,11 +98,14 @@ function fillAmmo(side) {
   var list = CB.slotItems(SLOT_AMMO).filter(function (r) { return CB.ammoFits(w, r[1]); });
   if (!list.length) { S[side].ammo = null; return; }
   if (!S[side].ammo || !list.some(function (r) { return r[0] === S[side].ammo; })) {
-    // default to the hardest-hitting ammo the bow can actually fire
-    var best = list[0];
-    list.forEach(function (r) {
-      if ((r[1].lr || 0) <= (w.lr || 0) && r[1].b[12] > best[1].b[12]) best = r;
-    });
+    // Default to the hardest-hitting ammo the bow can actually fire.  It has to
+    // start from one that fires: a shot the bow is not powerful enough for now
+    // deals nothing at all, so defaulting to rune arrows on a shortbow would
+    // open the page on a flat zero.
+    var firable = list.filter(function (r) { return (r[1].lr || 0) <= (w.lr || 0); });
+    var pool = firable.length ? firable : list;
+    var best = pool[0];
+    pool.forEach(function (r) { if (r[1].b[12] > best[1].b[12]) best = r; });
     S[side].ammo = best[0];
   }
   sel.innerHTML = list.map(function (r) {

@@ -22,6 +22,7 @@ var S = {
   pray: { attack: 0, strength: 0, defence: 0, protect: 0 },   // 0 = off, else the varp
   antifire: false,
   f2p: false,
+  safespot: false,
   style: 0,
   monster: null
 };
@@ -109,8 +110,9 @@ function npcAttack(mon, entry, ps) {
   }
   // dragonfire
   var B = G.breaths[entry.m];
-  // every dragonfire proc asks `inv_total(worn, antidragonbreathshield) > 0`
-  var shield = String(S.eq[SLOT_SHIELD]) === String(G.antifireShield);
+  // every dragonfire proc asks `inv_total(worn, antidragonbreathshield) > 0`,
+  // of the set being costed -- which is not the worn set while optimising
+  var shield = String((ps.equip || S.eq)[SLOT_SHIELD]) === String(G.antifireShield);
   var protMagic = protecting('magic');
   p = 1;
   if (B.rollDef) {
@@ -146,8 +148,13 @@ function npcAttack(mon, entry, ps) {
 /* The hitpoints [timer,health_regen] restores each second. */
 function regenPerSecond() { return G.regen[1] / (G.regen[0] * TICK); }
 
+/* What the monster actually gets to do: everything in melee range, or only what
+ * its [ai_applayer2] handler can reach you with when you are safespotted --
+ * which for most monsters, the dragons included, is nothing at all. */
+function attacksOf(mon) { return S.safespot ? (mon.ap || []) : mon.atk; }
+
 function fight(mon, ps) {
-  var rows = mon.atk.map(function (e) {
+  var rows = attacksOf(mon).map(function (e) {
     var a = npcAttack(mon, e, ps);
     a.weight = e.w;
     return a;
@@ -156,7 +163,8 @@ function fight(mon, ps) {
   rows.forEach(function (r) { perAttack += r.weight * r.damage; cycle += r.weight * r.delay; });
   var taken = cycle > 0 ? perAttack / (cycle * TICK) : 0;
 
-  var dealtHit = hitChance(ps.attackRoll, npcDefenceRoll(mon, ps.damagetype));
+  // a bow with the wrong ammunition, or none, never gets as far as a hit roll
+  var dealtHit = ps.fires ? hitChance(ps.attackRoll, npcDefenceRoll(mon, ps.damagetype)) : 0;
   var capped = Math.min(ps.maxhit, mon.md);
   var dealt = dealtHit * (capped / 2) / (ps.rate * TICK);
   return {
@@ -166,6 +174,212 @@ function fight(mon, ps) {
     regen: regenPerSecond(),
     survive: taken > regenPerSecond() ? S.lv.hitpoints / (taken - regenPerSecond()) : Infinity
   };
+}
+
+// ------------------------------------------------------------------ optimising
+//
+// Which slots can trade offence against defence depends on how you are
+// fighting, so the split is worked out per damage type rather than assumed.
+// Swinging a weapon, only the amulet, gloves and boots carry any melee attack
+// or strength bonus, and no body in the game touches your damage at all.
+// Drawing a bow, nearly every slot does -- 21 helmets, 17 bodies and 23 pairs
+// of legs carry ranged attack -- which is why dragonhide is worth wearing over
+// rune despite the defence it gives up.  Only the cape and the ring are purely
+// defensive either way.  So the search splits: slots that trade offence against
+// defence get enumerated, the rest are a straight pick of the best defence
+// against what this monster throws.
+//
+// The shield is the exception that stops this being a bonus-ranking exercise.
+// An anti-dragon shield gives up 43 points of defence and still cuts the damage
+// a green dragon does by three quarters, because it caps the breath rather than
+// dodging it.  So every candidate is scored on the damage it actually produces.
+
+var ATT_BONUS = [0, 1, 2, 4, 3], DEF_BONUS = [5, 6, 7, 9, 8];
+var KIT_SLOTS = [0, 1, 2, 4, 5, 7, 9, 10, 12, 13];
+
+function wearable(it) {
+  var req = it.req || {};
+  for (var k in req) if (k !== 'quest' && (S.lv[k] || 1) < req[k]) return false;
+  return !(S.f2p && it.m);
+}
+
+/* The items in one slot worth considering, on the three axes the fight reads:
+ * the attack bonus this style rolls, the strength behind it, and the defence
+ * against what is coming back.  Anything beaten on all three is dropped.
+ *
+ * Weight is the tiebreak, not a fourth axis.  The fight is not the whole cost
+ * -- a rune chainbody stops nearly what a platebody does for 7lb and 15,000gp
+ * less, and that weight is run energy, which is the walk back -- but making it
+ * an axis of its own would leave almost nothing dominated, since nearly every
+ * item weighs something different, and the search went from 0.2s to 15s.  So
+ * it only separates items the fight genuinely cannot tell apart. */
+function slotCandidates(slot, dt, monDt, ranged, weapon) {
+  var rows = CB.slotItems(slot).filter(function (r) {
+    if (!wearable(r[1])) return false;
+    // ammunition has to be something this bow can actually fire, or the whole
+    // weapon drops out of the search when the strongest arrow is trimmed to
+    if (slot === SLOT_AMMO) {
+      return weapon && CB.ammoFits(weapon, r[1]) && (r[1].lr || 0) <= (weapon.lr || 0);
+    }
+    return true;
+  })
+    .map(function (r) {
+      return { id: r[0], a: r[1].b[ATT_BONUS[dt]], s: r[1].b[ranged ? 12 : 10],
+               d: r[1].b[DEF_BONUS[monDt]], w: r[1].w || 0 };
+    });
+  rows.push({ id: null, a: 0, s: 0, d: 0, w: 0 });         // wearing nothing
+  var keep = rows.filter(function (x) {
+    return !rows.some(function (y) {
+      if (y === x) return false;
+      if (y.a >= x.a && y.s >= x.s && y.d >= x.d && (y.a > x.a || y.s > x.s || y.d > x.d)) return true;
+      // identical to the fight, so the lighter one stands in for both
+      return y.a === x.a && y.s === x.s && y.d === x.d && y.w < x.w;
+    });
+  });
+  // the anti-dragon shield is never the best bonus, and is often the best shield
+  if (slot === SLOT_SHIELD && G.antifireShield && keep.every(function (x) { return String(x.id) !== String(G.antifireShield); })) {
+    var ads = item(G.antifireShield);
+    if (ads && wearable(ads)) keep.push({ id: String(G.antifireShield), a: 0, s: 0, d: 0, w: ads.w || 0 });
+  }
+  return keep;
+}
+
+/* Sets the objective cannot separate are separated by what else they cost, in
+ * order: the combat axis the mode is not looking at, then weight.
+ *
+ * Both steps matter.  "Most damage dealt" ignores damage taken, so a great many
+ * sets tie on it -- going straight to weight there would drop the anti-dragon
+ * shield, which weighs 5lb and quarters what a dragon does to you, for a set
+ * that deals exactly the same and takes four times as much.  And the tolerance
+ * is deliberate rather than an equality test: a rune chainbody taking a
+ * hundredth of a hitpoint a second more than a platebody is not worth 7lb and
+ * 15,000gp, and floating point would not call the two equal anyway. */
+var TIED = 0.005;                                   // half a percent
+
+function ties(x, y) {
+  if (x === y) return true;
+  if (!isFinite(x) || !isFinite(y)) return false;
+  return Math.abs(x - y) <= Math.max(Math.abs(x), Math.abs(y), 1e-9) * TIED;
+}
+
+function preferred(cand, best) {
+  if (!best) return true;
+  if (!ties(cand.v, best.v)) return cand.v > best.v;
+  // the objective calls them equal; the axis it was not looking at breaks it
+  var second = cand.mode === 'taken' ? [cand.dealt, best.dealt]      // more damage dealt
+                                     : [-cand.taken, -best.taken];  // less damage taken
+  if (!ties(second[0], second[1])) return second[0] > second[1];
+  if (cand.w !== best.w) return cand.w < best.w;    // then the lighter set
+  return cand.v > best.v;
+}
+
+function score(mode, dealt, taken) {
+  if (mode === 'dealt') return dealt;
+  if (mode === 'taken') return -taken;
+  return taken > 0 ? dealt / taken : Infinity;      // damage dealt per damage taken
+}
+
+function optimise(mode) {
+  var mon = S.monster && G.monsters[S.monster];
+  if (!mon) return null;
+  var monDt = Math.min(Math.max(mon.dt, 0), 4);
+  var best = null, cache = {};
+  function cached(slot, dt, md, ranged, weapon) {
+    // only the ammunition list depends on which weapon is holding it
+    var key = slot + '|' + dt + '|' + (slot === SLOT_AMMO && weapon ? weapon.n : '');
+    if (!cache[key]) cache[key] = slotCandidates(slot, dt, md, ranged, weapon);
+    return cache[key];
+  }
+  CB.slotItems(SLOT_WEAPON).concat([[null, null]]).forEach(function (wr) {
+    var weapon = wr[1];
+    if (weapon && !wearable(weapon)) return;
+    var rows = CB.styleRows(weapon);
+    rows.forEach(function (row, si) {
+      var dt = row[2], ranged = dt === DT_RANGED;
+      if (dt === DT_MAGIC) return;                  // the page has no autocast model
+      var twoHanded = !!(weapon && weapon.c && weapon.c.indexOf(SLOT_SHIELD) >= 0);
+      var slots = KIT_SLOTS.filter(function (sl) {
+        if (sl === SLOT_SHIELD) return !twoHanded;
+        if (sl === SLOT_AMMO) return ranged;
+        return true;
+      });
+      var lists = slots.map(function (sl) { return [sl, cached(sl, dt, monDt, ranged, weapon)]; });
+      if (lists.some(function (pair) { return !pair[1].length; })) return;
+      // A slot whose items all carry the same offence cannot trade one against
+      // the other, so its best defence is simply its best choice and it never
+      // needs enumerating.  Which slots those are falls out of the candidate
+      // lists above, so it is most of them on a melee style and few of them on
+      // a ranged one.  The rest, and the shield with its anti-dragon case, go
+      // into the cross product.
+      var base = {}, varying = [];
+      lists.forEach(function (pair) {
+        var cs = pair[1];
+        var varies = pair[0] === SLOT_SHIELD || cs.some(function (c) { return c.a !== cs[0].a || c.s !== cs[0].s; });
+        if (varies) { varying.push(pair); return; }
+        var top = cs[0];
+        cs.forEach(function (c) { if (c.d > top.d || (c.d === top.d && c.w < top.w)) top = c; });
+        if (top.id) base[pair[0]] = top.id;
+      });
+      var combos = [base];
+      varying.forEach(function (pair) {
+        var next = [];
+        combos.forEach(function (prev) {
+          pair[1].forEach(function (c) {
+            var eq = {};
+            for (var k in prev) eq[k] = prev[k];
+            if (c.id) eq[pair[0]] = c.id;
+            next.push(eq);
+          });
+        });
+        combos = next;
+      });
+      combos.forEach(function (eq) {
+        if (weapon) eq[SLOT_WEAPON] = wr[0];
+        if (ranged && weapon && (weapon.cat === 'weapon_bow' || weapon.cat === 'weapon_crossbow') && !eq[SLOT_AMMO]) return;
+        var ps = CB.playerStats(eq, S.lv, si, {
+          attack: prayerMultiplier('attack'), strength: prayerMultiplier('strength'),
+          defence: prayerMultiplier('defence')
+        });
+        var f = fight(mon, ps);
+        var cand = { v: score(mode, f.dealt, f.taken), w: ps.weight, eq: eq, style: si, mode: mode,
+                     dealt: f.dealt, taken: f.taken };
+        if (preferred(cand, best)) best = cand;
+      });
+    });
+  });
+  return best;
+}
+
+function runOptimise(mode) {
+  if (!(S.monster && G.monsters[S.monster])) {
+    el('optnote').innerHTML = '<span class="warn">Pick a monster below first &mdash; there is nothing to optimise against.</span>';
+    return;
+  }
+  var before = fight(G.monsters[S.monster], playerStats());
+  var beforeEq = S.eq;
+  var best = optimise(mode);
+  if (!best) return;
+  S.eq = best.eq;
+  S.style = best.style;
+  save();
+  renderAll();
+  var label = { dealt: 'most damage dealt', taken: 'least damage taken', ratio: 'best damage dealt per damage taken' }[mode];
+  var extra = '';
+  if (S.safespot) {
+    // how far the chosen weapon reaches decides whether a safespot is findable
+    var w = item(best.eq[SLOT_WEAPON]);
+    var reach = w ? (w.ar || 1) : 1;
+    extra = ' <span class="safe">&middot; safespotted</span>' + (w
+      ? ' <span class="small">(' + esc(w.n) + ' reaches ' + reach + ' tile' + (reach === 1 ? '' : 's') +
+        ', +2 on longrange' + (reach <= 4 ? ' &mdash; short for a safespot' : '') + ')</span>'
+      : '');
+  }
+  el('optnote').innerHTML = 'Optimised for ' + label + ': <b>' + num(best.dealt, 2) + '</b> dealt, <b>' +
+    num(best.taken, 2) + '</b> taken a second, <b>' + num(best.w / 1000, 2) + '</b> kg' +
+    (before ? ' <span class="small">(was ' + num(before.dealt, 2) + ' / ' + num(before.taken, 2) + ' / ' +
+      num(CB.weight(beforeEq) / 1000, 2) + ' kg)</span>' : '') +
+    extra + ' <div class="small">Sets within half a percent of each other are settled by weight, so the ' +
+    'lighter of two the fight cannot separate is the one you get.</div>';
 }
 
 // ------------------------------------------------------------------ rendering
@@ -253,7 +467,22 @@ function renderBonuses(ps) {
   other.push([G.bonusLabels[10], b[10]]);
   other.push([G.bonusLabels[12], b[12]]);
   other.push([G.bonusLabels[11], b[11]]);
-  el('bonuses').innerHTML = table('Attack bonus', atk) + table('Defence bonus', def) + table('Other', other);
+  el('bonuses').innerHTML = table('Attack bonus', atk) + table('Defence bonus', def) + table('Other', other) +
+    '<div><h3>The set itself</h3><table>' +
+      '<tr><td>Weight</td><td>' + num(CB.weight(S.eq) / 1000, 2) + ' kg</td></tr>' +
+      '<tr><td>Cost</td><td>' + setCost(S.eq).toLocaleString() + ' gp</td></tr>' +
+    '</table><div class="small" style="margin-top:6px">Each obj\'s own <code>weight=</code> and ' +
+    '<code>cost=</code>. How much run energy the weight costs you is engine-side, so the pages do not ' +
+    'put a number on it.</div></div>';
+}
+
+function setCost(equip) {
+  var total = 0;
+  for (var slot in equip) {
+    var it = item(equip[slot]);
+    if (it) total += it.v || 0;
+  }
+  return total;
 }
 
 function renderStyles(ps) {
@@ -280,12 +509,15 @@ function renderAttack(ps) {
   var weapon = item(S.eq[SLOT_WEAPON]);
   var ammo = item(S.eq[SLOT_AMMO]);
   if (ps.ranged && weapon && (weapon.cat === 'weapon_bow' || weapon.cat === 'weapon_crossbow')) {
-    if (!ammo) warn = '<p class="warn small">No ammunition in the quiver &ndash; a bow without arrows will not fire.</p>';
+    if (!ammo) warn = '<p class="warn small">No ammunition in the quiver &ndash; a bow without arrows will not ' +
+      'fire, so this set deals nothing.</p>';
     else if (!ammoFits(weapon, ammo)) warn = '<p class="warn small">' + esc(ammo.n) + ' does not fit a ' +
-      esc(weapon.n) + ', so its ranged strength is not counted and the shot will not fire.</p>';
+      esc(weapon.n) + ', so its ranged strength is not counted and the shot will not fire &ndash; ' +
+      'this set deals nothing.</p>';
     else if ((ammo.lr || 0) > (weapon.lr || 0)) warn = '<p class="warn small">' + esc(weapon.n) +
-      ' is not powerful enough for ' + esc(ammo.n) + ', so it will not fire &ndash; the ranged strength below ' +
-      'still counts, because <code>~equip_get_bonuses</code> only checks that the ammo is the right kind.</p>';
+      ' is not powerful enough for ' + esc(ammo.n) + ', so it will not fire and this set deals nothing &ndash; ' +
+      'the ranged strength below still counts, because <code>~equip_get_bonuses</code> only checks that the ' +
+      'ammo is the right kind, while <code>~player_ranged_check_ammo</code> compares the two level gates.</p>';
   }
   var req = unmetRequirements();
   if (req.length) warn += '<p class="warn small">You could not wear this yet: ' + req.map(esc).join('; ') + '.</p>';
@@ -345,7 +577,10 @@ function renderFight(ps) {
     '<h3>What it throws at you</h3>' +
     '<table class="data"><thead><tr><th>Attack</th><th>Share</th><th>Max hit</th><th>Lands</th>' +
       '<th>Every</th><th>Average damage</th><th></th></tr></thead><tbody>' + rows + '</tbody></table>' +
-    (mon.ap ? '<p class="small">Its combat script branches on something other than a die roll, so the shares ' +
+    (S.safespot && !(mon.ap && mon.ap.length)
+      ? '<p class="small safe">Safespotted, it cannot touch you: reaching a player who is not adjacent needs an ' +
+        '<code>[ai_applayer2]</code> handler and this one has none, so there is no melee and no breath.</p>' : '') +
+    (mon.aprx ? '<p class="small">Its combat script branches on something other than a die roll, so the shares ' +
       'above split those branches evenly.</p>' : '');
 }
 
@@ -475,6 +710,7 @@ function save() {
   parts.push('pr=' + [S.pray.attack, S.pray.strength, S.pray.defence, S.pray.protect].join('.'));
   if (S.style) parts.push('st=' + S.style);
   if (S.antifire) parts.push('af=1');
+  if (S.safespot) parts.push('ss=1');
   if (S.f2p) parts.push('f2p=1');
   if (S.monster) parts.push('m=' + S.monster);
   history.replaceState(null, '', '#' + parts.join('&'));
@@ -496,6 +732,7 @@ function load() {
       S.pray.attack = p[0] || 0; S.pray.strength = p[1] || 0; S.pray.defence = p[2] || 0; S.pray.protect = p[3] || 0; }
     else if (k === 'st') S.style = parseInt(v, 10) || 0;
     else if (k === 'af') S.antifire = v === '1';
+    else if (k === 'ss') S.safespot = v === '1';
     else if (k === 'f2p') S.f2p = v === '1';
     else if (k === 'm' && G.monsters[v]) S.monster = v;
   });
@@ -515,6 +752,11 @@ function init() {
   };
   el('antifire').checked = S.antifire;
   el('antifire').onchange = function () { S.antifire = el('antifire').checked; save(); renderAll(false); };
+  el('safespot').checked = S.safespot;
+  el('safespot').onchange = function () { S.safespot = el('safespot').checked; save(); renderAll(false); };
+  Array.prototype.forEach.call(el('optimise').querySelectorAll('button'), function (btn) {
+    btn.onclick = function () { runOptimise(btn.dataset.opt); };
+  });
   el('pickclose').onclick = closePicker;
   el('picker').onclick = function (e) { if (e.target === el('picker')) closePicker(); };
   el('pickfind').oninput = function () { fillPicker(el('pickfind').value); };

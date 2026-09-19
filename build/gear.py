@@ -154,6 +154,26 @@ def _int(v, default=0):
         return default
 
 
+# obj `weight=` is written in four units; the pages want one number
+_WEIGHT_UNITS = {'g': 1.0, 'kg': 1000.0, 'lb': 453.59237, 'oz': 28.349523125}
+_WEIGHT_RE = re.compile(r'^(-?[0-9.]+)(g|kg|lb|oz)$')
+
+
+def _weight_grams(raw):
+    """An obj's `weight=` in grams.  Unknown units are a build error, not a zero."""
+    if not raw:
+        return 0
+    m = _WEIGHT_RE.match(str(raw).strip().lower())
+    if not m:
+        raise SystemExit('gear: cannot read weight %r - update _weight_grams in build/gear.py' % raw)
+    return int(round(float(m.group(1)) * _WEIGHT_UNITS[m.group(2)]))
+
+
+# [proc,player_ranged_check_ammo] singles this bow out: it fires ogre arrows and
+# nothing else, while every other bow fires arrows and refuses ogre ones
+OGRE_BOW = 'ogre_bow'
+
+
 # ---------------------------------------------------------------- attack styles
 
 def parse_interface(path):
@@ -383,8 +403,14 @@ class AttackWalker:
         self.blocks = blocks
         self.spells = spells
 
+    def _walk(self, key):
+        self.leaves, self.approx, self.modes = {}, False, set()
+        self.run(self.stmts(key), Fraction(1), 0, set(), False, {})
+        return self.summary() if self.leaves else None
+
     def profile(self, npc_name, category=None):
-        """([{'kind','model','spell','weight'}], approximate), or None for the default melee.
+        """([{'kind','model','spell','weight'}], approximate) with you in melee
+        range, or None for the default melee handler.
 
         An npc's own handler wins over the one its category shares.
         """
@@ -393,14 +419,25 @@ class AttackWalker:
                 key = (trigger, name)
                 if key not in self.blocks:
                     continue
-                self.leaves, self.approx, self.modes = {}, False, set()
-                self.run(self.stmts(key), Fraction(1), 0, set(), False, {})
-                if self.leaves:
-                    return self.summary()
+                got = self._walk(key)
+                if got:
+                    return got
                 # an npc whose op handler only hands over to the ap handler
                 # (witches, mages) has its attacks there instead
                 if 'applayer2' not in self.modes:
                     break
+        return None
+
+    def range_profile(self, npc_name, category=None):
+        """What it can still do once you are out of its reach, which for most
+        monsters is nothing: reaching a player who is not adjacent needs an
+        [ai_applayer2] handler, and only the ranged, the casters and two of the
+        dragons have one.  The rest are the safespot.
+        """
+        for name in ([npc_name] + (['_' + category] if category else [])):
+            key = ('ai_applayer2', name)
+            if key in self.blocks:
+                return self._walk(key)
         return None
 
     def stmts(self, key):
@@ -567,39 +604,145 @@ def build_regen(b):
     return [ticks, amount]
 
 
-def _mark_variants(items):
-    """Flag the trimmed, gold and charged copies of an item the pages cannot tell apart.
+def _attack_entry(r, spells):
+    """One weighted attack of a monster's profile, as the pages read it."""
+    e = {'k': r['kind'], 'w': round(float(r['weight']), 6)}
+    if r['model']:
+        e['m'] = r['model']
+    if r['spell']:
+        name, speed = r['spell']
+        sp = spells.get(name)
+        e['sp'] = sp['name'] if sp else pretty(name or 'spell')
+        e['mh'] = sp['maxhit'] if sp else 0
+        if speed:
+            e['d'] = speed
+    return e
 
-    A gold-trimmed rune platebody has exactly the stats of a plain one, so the
-    equipment pickers would otherwise list the same set three times over.  An
-    item is folded away only when its name carries a parenthetical *and* another
-    item exists that every number on these pages reads identically: the same
-    slot, covered slots, category, attack rate, level gate and all 13 bonuses.
 
-    That keeps anything the pages would treat differently, whatever its name --
-    a silver sickle(b) has +5 prayer over a plain one, and a bronze spear(p) has
-    a different stab bonus -- and it keeps every item whose name is its own, so
-    a Saradomin platebody stays listed beside the rune one it copies.  A group
-    with nothing but parenthetical names (rings of dueling, which differ only in
-    charges left) keeps its first member rather than vanishing entirely.
+def _mark_variants(items, cfgnames):
+    """Fold away the copies of an item these pages cannot tell apart.
 
-    Poisoned weapons fold into their plain versions, because poison is not part
-    of what these pages work out.
+    The content names a variant after the item it copies: a gold-trimmed rune
+    platebody is `rune_platebody_gold`, a Saradomin one is
+    `rune_platebody_saradomin`, a poisoned iron dagger is `iron_dagger_p`.  So
+    the first and best test is that naming -- an item whose config name is
+    another item's config name plus a suffix, and which reads identically to it
+    on every number these pages use, is that item in another colour and folds
+    into it.  God armour is exactly this: the four platebodies of Saradomin,
+    Guthix, Zamorak and rune are one item with four recolours, down to the
+    weight and the 65,000gp.
+
+    Taking the base from the config name rather than guessing at the display
+    names also gets the survivor right.  Picking the shortest name instead left
+    the trimmed rune kiteshields folded into "Saradomin kite", which is two
+    characters shorter than "Rune kiteshield" and not the item anybody means.
+
+    A second pass catches what the naming does not: within a stats group, items
+    whose display names differ only by a parenthetical fold together -- the
+    seven coloured capes, the eighteen chompy bird hats, the eight rings of
+    dueling.  It has to go by that stem and not by the stats alone, because a
+    stats group is only as specific as its numbers: every item with no bonuses
+    at all shares one, so a ring of dueling would otherwise fold into a sapphire
+    ring and chompy hats into party hats.
+
+    Every pass needs the two items to read identically on the same terms: the
+    slot, covered slots, category, attack rate, level gate, requirements and all
+    13 bonuses.  The requirements have to be in there -- a Hazeel Cult death
+    dagger has exactly the stats of a black dagger and needs no attack level for
+    it, so leaving them out folds the real black dagger into a quest item -- and
+    what the pages would treat differently is kept whatever its name, so a
+    silver sickle(b) (+5 prayer) and a bronze spear(p) (a different stab bonus)
+    both stay.  A group of nothing but parenthetical names (rings of dueling,
+    which differ only in charges left) keeps its first member rather than
+    vanishing entirely.
     """
-    groups = {}
-    for iid, rec in items.items():
-        key = (rec['s'], tuple(rec.get('c', ())), rec['r'], rec.get('lr', 0), tuple(rec['b']),
-               rec.get('cat') if rec['s'] == WEARPOS.index('righthand') else None)
-        groups.setdefault(key, []).append(iid)
+    def reads(iid):
+        rec = items[iid]
+        return (rec['s'], tuple(rec.get('c', ())), rec['r'], rec.get('lr', 0), tuple(rec['b']),
+                json.dumps(rec.get('req'), sort_keys=True), rec.get('w', 0),
+                rec.get('cat') if rec['s'] == WEARPOS.index('righthand') else None)
+
     folded = 0
+
+    # 1. a config name that is another item's plus a suffix
+    by_cfg = {}
+    for iid, name in cfgnames.items():
+        by_cfg.setdefault(name, iid)
+    for iid, name in cfgnames.items():
+        parts = name.split('_')
+        for cut in range(len(parts) - 1, 0, -1):
+            base = by_cfg.get('_'.join(parts[:cut]))
+            if base is None or base == iid:
+                continue
+            if reads(base) == reads(iid):
+                items[iid]['dup'] = base
+                folded += 1
+            break
+    # a variant of a variant points at whatever survived
+    for iid in items:
+        seen = set()
+        while items[iid].get('dup') in items and items[items[iid]['dup']].get('dup') is not None:
+            if items[iid]['dup'] in seen:
+                break
+            seen.add(items[iid]['dup'])
+            items[iid]['dup'] = items[items[iid]['dup']]['dup']
+
+    # 2. what the naming missed: same stats, and a display name that differs
+    #    only by a parenthetical
+    def stem(name):
+        return re.sub(r'\s*\([^)]*\)\s*$', '', name).strip().lower()
+
+    groups = {}
+    for iid in items:
+        if 'dup' not in items[iid]:
+            groups.setdefault((reads(iid), stem(items[iid]['n'])), []).append(iid)
     for ids in groups.values():
+        if len(ids) < 2:
+            continue
         plain = [i for i in ids if '(' not in items[i]['n']]
-        keep = min(plain or ids, key=lambda i: (len(items[i]['n']), items[i]['n'], i))
+        keep = min(plain or ids)                      # the base item is the older id
         for i in ids:
-            if i != keep and '(' in items[i]['n']:
+            if i != keep:
                 items[i]['dup'] = keep
                 folded += 1
     return folded
+
+
+def _disambiguate(items, cfgnames):
+    """Qualify the items still sharing a display name once the copies are folded.
+
+    What is left differs in ways these pages do read, so it cannot be folded and
+    must not look alike either.  The content calls all four dragonhide bodies
+    "Dragonhide body" and tells them apart by config name and recolour, so the
+    picker would otherwise offer four identical-looking rows needing ranged 40,
+    50, 60 and 70.  The qualifier is whatever the config name says that the
+    display name does not: black_dragonhide_body -> "Dragonhide body (black)".
+    """
+    groups = {}
+    for iid, rec in items.items():
+        if not rec.get('dup'):
+            groups.setdefault(rec['n'], []).append(iid)
+    renamed = 0
+    for name, ids in groups.items():
+        if len(ids) < 2:
+            continue
+        said = set(re.findall(r'[a-z]+', name.lower()))
+        # tokens every member carries say nothing about which one this is
+        shared = set.intersection(*[set(cfgnames[i].split('_')) for i in ids])
+        said |= shared
+        # a monk's robe top and bottom share their name and differ only in where
+        # they go, and the slot says that far better than the config name does
+        slots = [items[i]['s'] for i in ids]
+        by_slot = len(set(slots)) == len(slots)
+        for iid in ids:
+            if by_slot:
+                extra = [dict(SLOTS).get(items[iid]['s'], '').lower()]
+            else:
+                extra = [w for w in cfgnames[iid].split('_') if w not in said]
+            if extra and extra[0]:
+                items[iid]['n'] = '%s (%s)' % (name, ' '.join(extra))
+                renamed += 1
+    return renamed
 
 
 def _check_breath(b):
@@ -615,6 +758,27 @@ def _check_breath(b):
                                  % (pattern, spec['proc'], blk['file']))
 
 
+def _check_ammo_rule(b):
+    """Re-read the bow/ammo gate the pages model, so it cannot go stale.
+
+    [proc,player_ranged_check_ammo] returns null in four cases and the caller
+    does `p_stopaction`, so a shot that fails any of them simply never happens.
+    CB.canFire in static/combat.js is these four checks.
+    """
+    blk = b.blocks.get(('proc', 'player_ranged_check_ammo'))
+    if not blk:
+        raise SystemExit('gear: [proc,player_ranged_check_ammo] not found - the ammo model needs updating')
+    checks = [r'\$ammo\s*=\s*null',
+              r'\$rhand\s*=\s*ogre_bow\s*&\s*\$ammo_cat\s*!\s*ogre_arrows',
+              r'\$weapon_cat\s*=\s*weapon_bow\s*&\s*\$ammo_cat\s*!\s*arrows',
+              r'\$weapon_cat\s*=\s*weapon_crossbow\s*&\s*\$ammo_cat\s*!\s*bolts',
+              r'oc_param\(\$ammo,\s*levelrequire\)\s*>\s*oc_param\(\$rhand,\s*levelrequire\)']
+    for pattern in checks:
+        if not re.search(pattern, blk['body']):
+            raise SystemExit('gear: %s no longer matches [proc,player_ranged_check_ammo] (%s) - update '
+                             'canFire in build/static/combat.js' % (pattern, blk['file']))
+
+
 # ---------------------------------------------------------------- the build
 
 def build_gear_data(b):
@@ -622,6 +786,7 @@ def build_gear_data(b):
     from tables import load_constants
     constants = load_constants()
     _check_breath(b)
+    _check_ammo_rule(b)
 
     cat2table, style_tables, style_bonuses, default_style_bonus = build_styles(b, constants)
     reqs = build_requirements(b)
@@ -631,8 +796,15 @@ def build_gear_data(b):
 
     # ---- items
     items = {}
+    cfgnames = {}
+    placeholders = 0
     for it in b.items.values():
         if it['id'] is None or it['dummy'] or not it['wearpos']:
+            continue
+        # a handful of unfinished items carry 255 in every bonus as a placeholder.
+        # They are not real gear, and left in they win every comparison outright.
+        if all(_int(it['params'].get(k, 0)) == 255 for k in BONUS_KEYS):
+            placeholders += 1
             continue
         slot = WEARPOS.index(it['wearpos']) if it['wearpos'] in WEARPOS else None
         if slot is None:
@@ -656,8 +828,21 @@ def build_gear_data(b):
         lr = _int(it['params'].get('levelrequire', 0))
         if lr:
             rec['lr'] = lr
+        reach = _int(it['params'].get('attackrange', 0))
+        if reach:
+            rec['ar'] = reach        # ~player_attackrange, +2 on longrange
+        weight = _weight_grams(it['weight'])
+        if weight:
+            rec['w'] = weight        # grams; what a set weighs is a running cost
+        cost = _int(it['cost'])
+        if cost:
+            rec['v'] = cost
+        if it['name'] == OGRE_BOW:
+            rec['oa'] = 1            # fires ogre arrows and refuses ordinary ones
         items[it['id']] = rec
-    _mark_variants(items)
+        cfgnames[it['id']] = it['name']
+    _mark_variants(items, cfgnames)
+    renamed = _disambiguate(items, cfgnames)
 
     # ---- monsters
     walker = AttackWalker(b.blocks, spells)
@@ -674,23 +859,12 @@ def build_gear_data(b):
             stats[k] = _int(cfg['d'].get(k, 0))
         damagetype = constants.get(str(p.get('damagetype', '')).lstrip('^'), _int(p.get('damagetype', 2), 2))
         prof = walker.profile(n['name'], n['category'])
+        at_range = walker.range_profile(n['name'], n['category'])
         if prof is None:
             prof = ([{'kind': 'melee', 'model': None, 'spell': None, 'weight': Fraction(1)}], False)
         rows, approx = prof
         approx_count += 1 if approx else 0
-        atk = []
-        for r in rows:
-            e = {'k': r['kind'], 'w': round(float(r['weight']), 6)}
-            if r['model']:
-                e['m'] = r['model']
-            if r['spell']:
-                name, speed = r['spell']
-                sp = spells.get(name)
-                e['sp'] = sp['name'] if sp else pretty(name or 'spell')
-                e['mh'] = sp['maxhit'] if sp else 0
-                if speed:
-                    e['d'] = speed
-            atk.append(e)
+        atk = [_attack_entry(r, spells) for r in rows]
         monsters[n['id']] = {
             'n': n['display'], 'lv': n['level'], 'u': n['url'],
             'st': [stats['attack'], stats['strength'], stats['defence'], stats['magic'],
@@ -702,8 +876,10 @@ def build_gear_data(b):
             'atk': atk,
             'ic': 1 if b.has_npc_icon(n) else 0,
         }
+        if at_range:
+            monsters[n['id']]['ap'] = [_attack_entry(r, spells) for r in at_range[0]]
         if approx:
-            monsters[n['id']]['ap'] = 1
+            monsters[n['id']]['aprx'] = 1
         if n['category']:
             monsters[n['id']]['c'] = n['category']
 
@@ -736,6 +912,11 @@ def build_gear_data(b):
     with open(path, 'w', encoding='utf-8') as f:
         f.write('window.GEAR = ' + json.dumps(data, separators=(',', ':')) + ';\n')
     dups = sum(1 for r in items.values() if 'dup' in r)
-    return ('gear: %d equippable items (%d trimmed/charged copies folded away), %d monsters '
-            '(%d with an approximated attack profile), %d weapon style tables, %d hp per %d ticks'
-            % (len(items), dups, len(monsters), approx_count, len(style_tables), regen[1], regen[0]))
+    reach = sum(1 for m in monsters.values() if 'ap' in m)
+    weighed = sum(1 for r in items.values() if 'w' in r)
+    return ('gear: %d equippable items (%d indistinguishable copies folded away, %d placeholders dropped, '
+            '%d same-named ones qualified, %d weighed), '
+            '%d monsters (%d with an approximated attack profile, %d that can reach a safespot), '
+            '%d weapon style tables, %d hp per %d ticks'
+            % (len(items), dups, placeholders, renamed, weighed, len(monsters), approx_count, reach,
+               len(style_tables), regen[1], regen[0]))
