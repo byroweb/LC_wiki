@@ -255,9 +255,13 @@ also works in most browsers because every data file is a plain `.js` file.
   dueling would fold into a sapphire ring. What survives is what the pages would
   read differently: a silver sickle(b) (+5 prayer), a bronze spear(p) (a
   different stab bonus), the four elemental battlestaves (one model, one set of
-  numbers, four different runes), and both pairs of boots of lightness, whose
-  worn version is the one item in the content with a negative `weight=` and so is
-  10lb lighter than the pair it otherwise matches. The requirements are part of
+  numbers, four different runes). The boots of lightness are the exception to the
+  exception: the two objs differ by 10lb, but `[proc,update_weight_equipment]`
+  swaps the pair you carry for the worn pair the moment you put them on in
+  members, so the pickers offer only the worn form -- the one item in the content
+  with a negative `weight=` -- because that is the pair you are ever actually
+  wearing. The swap is read out of that proc rather than listed in the build,
+  since the proc's own comment says it will grow. The requirements are part of
   the test too: a Hazeel Cult death dagger has exactly the stats of a black
   dagger and needs no attack level for it, so leaving them out folds the real
   black dagger into a quest item. What is left sharing a name is
