@@ -624,10 +624,14 @@
   document.getElementById('zin').onclick = function () { state.zoom = Math.min(8, state.zoom * 1.5); draw(); };
   document.getElementById('zout').onclick = function () { state.zoom = Math.max(0.25, state.zoom / 1.5); draw(); };
   document.getElementById('reset').onclick = function () {
-    // clears the spawn chunk too, so reset really does leave nothing selected.
+    // a clean slate: the spawn chunk goes too, so reset really does leave nothing
+    // selected, and the ticks go with it rather than carrying someone else's
+    // progress into the new run.  "clear ticks" still clears those on their own.
+    state.unlocked = new Set();
+    ticked = {};
+    saveTicks();
     // go() syncs, which saves the empty run: forgetting it instead would let the
     // next load fall back to the default and put the spawn chunk straight back.
-    state.unlocked = new Set();
     go(START);
   };
   document.getElementById('rand').onclick = function () {
