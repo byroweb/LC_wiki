@@ -186,6 +186,25 @@ also works in most browsers because every data file is a plain `.js` file.
   hitpoints `[timer,health_regen]` puts back (1 every 100 ticks), so anything
   hitting for less than that never kills you. The whole set-up lives in the URL,
   so a build can be shared.
+  An **optimise** button fills the slots with the best set you could wear against
+  the chosen monster, for most damage dealt, least damage taken, or the best of
+  both. It is an exact search rather than a ranking of bonuses, which matters in
+  two ways. Only the amulet, gloves and boots carry any melee attack or strength
+  bonus -- head, cape, body, shield, legs and ring are purely defensive, and no
+  body in the game touches your damage at all -- so every other slot is a
+  straight pick and only the few that trade offence against defence get
+  enumerated. And every candidate is scored on the damage it actually produces,
+  because an anti-dragon shield gives up 43 points of defence and still cuts what
+  a green dragon does by three quarters: the best shield is not the one with the
+  best bonus. A **safespotted** toggle takes the monster's melee away and leaves
+  only what its `[ai_applayer2]` handler can reach you with, which for most of
+  them -- the green, blue, red and black dragons included, whose range handlers
+  are commented out in the content -- is nothing at all. Elvarg and the King
+  Black Dragon do have one and still breathe on you. The weapon's `attackrange`
+  is reported alongside, since a knife reaching 4 tiles is a different
+  proposition to a shortbow reaching 7.
+  Items whose every bonus is 255 are placeholders in the content rather than
+  gear, and are left out.
   The pickers leave out the trimmed, gold and charged copies of an item: a
   gold-trimmed rune platebody has exactly the stats of a plain one, so listing
   both only says the same thing twice. A copy is folded away only when its name

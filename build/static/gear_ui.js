@@ -22,6 +22,7 @@ var S = {
   pray: { attack: 0, strength: 0, defence: 0, protect: 0 },   // 0 = off, else the varp
   antifire: false,
   f2p: false,
+  safespot: false,
   style: 0,
   monster: null
 };
@@ -109,8 +110,9 @@ function npcAttack(mon, entry, ps) {
   }
   // dragonfire
   var B = G.breaths[entry.m];
-  // every dragonfire proc asks `inv_total(worn, antidragonbreathshield) > 0`
-  var shield = String(S.eq[SLOT_SHIELD]) === String(G.antifireShield);
+  // every dragonfire proc asks `inv_total(worn, antidragonbreathshield) > 0`,
+  // of the set being costed -- which is not the worn set while optimising
+  var shield = String((ps.equip || S.eq)[SLOT_SHIELD]) === String(G.antifireShield);
   var protMagic = protecting('magic');
   p = 1;
   if (B.rollDef) {
@@ -146,8 +148,13 @@ function npcAttack(mon, entry, ps) {
 /* The hitpoints [timer,health_regen] restores each second. */
 function regenPerSecond() { return G.regen[1] / (G.regen[0] * TICK); }
 
+/* What the monster actually gets to do: everything in melee range, or only what
+ * its [ai_applayer2] handler can reach you with when you are safespotted --
+ * which for most monsters, the dragons included, is nothing at all. */
+function attacksOf(mon) { return S.safespot ? (mon.ap || []) : mon.atk; }
+
 function fight(mon, ps) {
-  var rows = mon.atk.map(function (e) {
+  var rows = attacksOf(mon).map(function (e) {
     var a = npcAttack(mon, e, ps);
     a.weight = e.w;
     return a;
@@ -166,6 +173,164 @@ function fight(mon, ps) {
     regen: regenPerSecond(),
     survive: taken > regenPerSecond() ? S.lv.hitpoints / (taken - regenPerSecond()) : Infinity
   };
+}
+
+// ------------------------------------------------------------------ optimising
+//
+// Only the amulet, gloves and boots carry any melee attack or strength bonus --
+// head, cape, body, shield, legs and ring are purely defensive, and no body in
+// the game touches your damage at all.  So the search splits: a handful of
+// slots trade offence against defence and need enumerating, the rest are a
+// straight pick of the best defence against what this monster throws.
+//
+// The shield is the exception that stops this being a bonus-ranking exercise.
+// An anti-dragon shield gives up 43 points of defence and still cuts the damage
+// a green dragon does by three quarters, because it caps the breath rather than
+// dodging it.  So every candidate is scored on the damage it actually produces.
+
+var ATT_BONUS = [0, 1, 2, 4, 3], DEF_BONUS = [5, 6, 7, 9, 8];
+var KIT_SLOTS = [0, 1, 2, 4, 5, 7, 9, 10, 12, 13];
+
+function wearable(it) {
+  var req = it.req || {};
+  for (var k in req) if (k !== 'quest' && (S.lv[k] || 1) < req[k]) return false;
+  return !(S.f2p && it.m);
+}
+
+/* The items in one slot worth considering, on the three axes that can matter:
+ * the attack bonus this style rolls, the strength behind it, and the defence
+ * against what is coming back.  Anything beaten on all three is dropped. */
+function slotCandidates(slot, dt, monDt, ranged, weapon) {
+  var rows = CB.slotItems(slot).filter(function (r) {
+    if (!wearable(r[1])) return false;
+    // ammunition has to be something this bow can actually fire, or the whole
+    // weapon drops out of the search when the strongest arrow is trimmed to
+    if (slot === SLOT_AMMO) {
+      return weapon && CB.ammoFits(weapon, r[1]) && (r[1].lr || 0) <= (weapon.lr || 0);
+    }
+    return true;
+  })
+    .map(function (r) {
+      return { id: r[0], a: r[1].b[ATT_BONUS[dt]], s: r[1].b[ranged ? 12 : 10], d: r[1].b[DEF_BONUS[monDt]] };
+    });
+  rows.push({ id: null, a: 0, s: 0, d: 0 });              // wearing nothing
+  var keep = rows.filter(function (x) {
+    return !rows.some(function (y) {
+      return y !== x && y.a >= x.a && y.s >= x.s && y.d >= x.d && (y.a > x.a || y.s > x.s || y.d > x.d);
+    });
+  });
+  // the anti-dragon shield is never the best bonus, and is often the best shield
+  if (slot === SLOT_SHIELD && G.antifireShield && keep.every(function (x) { return String(x.id) !== String(G.antifireShield); })) {
+    var ads = item(G.antifireShield);
+    if (ads && wearable(ads)) keep.push({ id: String(G.antifireShield), a: 0, s: 0, d: 0 });
+  }
+  return keep;
+}
+
+function score(mode, dealt, taken) {
+  if (mode === 'dealt') return dealt;
+  if (mode === 'taken') return -taken;
+  return taken > 0 ? dealt / taken : Infinity;      // damage dealt per damage taken
+}
+
+function optimise(mode) {
+  var mon = S.monster && G.monsters[S.monster];
+  if (!mon) return null;
+  var monDt = Math.min(Math.max(mon.dt, 0), 4);
+  var best = null, cache = {};
+  function cached(slot, dt, md, ranged, weapon) {
+    // only the ammunition list depends on which weapon is holding it
+    var key = slot + '|' + dt + '|' + (slot === SLOT_AMMO && weapon ? weapon.n : '');
+    if (!cache[key]) cache[key] = slotCandidates(slot, dt, md, ranged, weapon);
+    return cache[key];
+  }
+  CB.slotItems(SLOT_WEAPON).concat([[null, null]]).forEach(function (wr) {
+    var weapon = wr[1];
+    if (weapon && !wearable(weapon)) return;
+    var rows = CB.styleRows(weapon);
+    rows.forEach(function (row, si) {
+      var dt = row[2], ranged = dt === DT_RANGED;
+      if (dt === DT_MAGIC) return;                  // the page has no autocast model
+      var twoHanded = !!(weapon && weapon.c && weapon.c.indexOf(SLOT_SHIELD) >= 0);
+      var slots = KIT_SLOTS.filter(function (sl) {
+        if (sl === SLOT_SHIELD) return !twoHanded;
+        if (sl === SLOT_AMMO) return ranged;
+        return true;
+      });
+      var lists = slots.map(function (sl) { return [sl, cached(sl, dt, monDt, ranged, weapon)]; });
+      if (lists.some(function (pair) { return !pair[1].length; })) return;
+      // A slot whose items all carry the same offence (which is most of them --
+      // head, cape, body, legs and ring have none at all) cannot trade one
+      // against the other, so its best defence is simply its best choice and it
+      // never needs enumerating.  Only the few that vary, and the shield with
+      // its anti-dragon case, go into the cross product.
+      var base = {}, varying = [];
+      lists.forEach(function (pair) {
+        var cs = pair[1];
+        var varies = pair[0] === SLOT_SHIELD || cs.some(function (c) { return c.a !== cs[0].a || c.s !== cs[0].s; });
+        if (varies) { varying.push(pair); return; }
+        var top = cs[0];
+        cs.forEach(function (c) { if (c.d > top.d) top = c; });
+        if (top.id) base[pair[0]] = top.id;
+      });
+      var combos = [base];
+      varying.forEach(function (pair) {
+        var next = [];
+        combos.forEach(function (prev) {
+          pair[1].forEach(function (c) {
+            var eq = {};
+            for (var k in prev) eq[k] = prev[k];
+            if (c.id) eq[pair[0]] = c.id;
+            next.push(eq);
+          });
+        });
+        combos = next;
+      });
+      combos.forEach(function (eq) {
+        if (weapon) eq[SLOT_WEAPON] = wr[0];
+        if (ranged && weapon && (weapon.cat === 'weapon_bow' || weapon.cat === 'weapon_crossbow') && !eq[SLOT_AMMO]) return;
+        var ps = CB.playerStats(eq, S.lv, si, {
+          attack: prayerMultiplier('attack'), strength: prayerMultiplier('strength'),
+          defence: prayerMultiplier('defence')
+        });
+        var f = fight(mon, ps);
+        var v = score(mode, f.dealt, f.taken);
+        if (!best || v > best.v || (v === best.v && f.dealt > best.dealt)) {
+          best = { v: v, eq: eq, style: si, dealt: f.dealt, taken: f.taken };
+        }
+      });
+    });
+  });
+  return best;
+}
+
+function runOptimise(mode) {
+  if (!(S.monster && G.monsters[S.monster])) {
+    el('optnote').innerHTML = '<span class="warn">Pick a monster below first &mdash; there is nothing to optimise against.</span>';
+    return;
+  }
+  var before = fight(G.monsters[S.monster], playerStats());
+  var best = optimise(mode);
+  if (!best) return;
+  S.eq = best.eq;
+  S.style = best.style;
+  save();
+  renderAll();
+  var label = { dealt: 'most damage dealt', taken: 'least damage taken', ratio: 'best damage dealt per damage taken' }[mode];
+  var extra = '';
+  if (S.safespot) {
+    // how far the chosen weapon reaches decides whether a safespot is findable
+    var w = item(best.eq[SLOT_WEAPON]);
+    var reach = w ? (w.ar || 1) : 1;
+    extra = ' <span class="safe">&middot; safespotted</span>' + (w
+      ? ' <span class="small">(' + esc(w.n) + ' reaches ' + reach + ' tile' + (reach === 1 ? '' : 's') +
+        ', +2 on longrange' + (reach <= 4 ? ' &mdash; short for a safespot' : '') + ')</span>'
+      : '');
+  }
+  el('optnote').innerHTML = 'Optimised for ' + label + ': <b>' + num(best.dealt, 2) + '</b> dealt, <b>' +
+    num(best.taken, 2) + '</b> taken a second' +
+    (before ? ' <span class="small">(was ' + num(before.dealt, 2) + ' / ' + num(before.taken, 2) + ')</span>' : '') +
+    extra;
 }
 
 // ------------------------------------------------------------------ rendering
@@ -345,7 +510,10 @@ function renderFight(ps) {
     '<h3>What it throws at you</h3>' +
     '<table class="data"><thead><tr><th>Attack</th><th>Share</th><th>Max hit</th><th>Lands</th>' +
       '<th>Every</th><th>Average damage</th><th></th></tr></thead><tbody>' + rows + '</tbody></table>' +
-    (mon.ap ? '<p class="small">Its combat script branches on something other than a die roll, so the shares ' +
+    (S.safespot && !(mon.ap && mon.ap.length)
+      ? '<p class="small safe">Safespotted, it cannot touch you: reaching a player who is not adjacent needs an ' +
+        '<code>[ai_applayer2]</code> handler and this one has none, so there is no melee and no breath.</p>' : '') +
+    (mon.aprx ? '<p class="small">Its combat script branches on something other than a die roll, so the shares ' +
       'above split those branches evenly.</p>' : '');
 }
 
@@ -475,6 +643,7 @@ function save() {
   parts.push('pr=' + [S.pray.attack, S.pray.strength, S.pray.defence, S.pray.protect].join('.'));
   if (S.style) parts.push('st=' + S.style);
   if (S.antifire) parts.push('af=1');
+  if (S.safespot) parts.push('ss=1');
   if (S.f2p) parts.push('f2p=1');
   if (S.monster) parts.push('m=' + S.monster);
   history.replaceState(null, '', '#' + parts.join('&'));
@@ -496,6 +665,7 @@ function load() {
       S.pray.attack = p[0] || 0; S.pray.strength = p[1] || 0; S.pray.defence = p[2] || 0; S.pray.protect = p[3] || 0; }
     else if (k === 'st') S.style = parseInt(v, 10) || 0;
     else if (k === 'af') S.antifire = v === '1';
+    else if (k === 'ss') S.safespot = v === '1';
     else if (k === 'f2p') S.f2p = v === '1';
     else if (k === 'm' && G.monsters[v]) S.monster = v;
   });
@@ -515,6 +685,11 @@ function init() {
   };
   el('antifire').checked = S.antifire;
   el('antifire').onchange = function () { S.antifire = el('antifire').checked; save(); renderAll(false); };
+  el('safespot').checked = S.safespot;
+  el('safespot').onchange = function () { S.safespot = el('safespot').checked; save(); renderAll(false); };
+  Array.prototype.forEach.call(el('optimise').querySelectorAll('button'), function (btn) {
+    btn.onclick = function () { runOptimise(btn.dataset.opt); };
+  });
   el('pickclose').onclick = closePicker;
   el('picker').onclick = function (e) { if (e.target === el('picker')) closePicker(); };
   el('pickfind').oninput = function () { fillPicker(el('pickfind').value); };

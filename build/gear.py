@@ -383,8 +383,14 @@ class AttackWalker:
         self.blocks = blocks
         self.spells = spells
 
+    def _walk(self, key):
+        self.leaves, self.approx, self.modes = {}, False, set()
+        self.run(self.stmts(key), Fraction(1), 0, set(), False, {})
+        return self.summary() if self.leaves else None
+
     def profile(self, npc_name, category=None):
-        """([{'kind','model','spell','weight'}], approximate), or None for the default melee.
+        """([{'kind','model','spell','weight'}], approximate) with you in melee
+        range, or None for the default melee handler.
 
         An npc's own handler wins over the one its category shares.
         """
@@ -393,14 +399,25 @@ class AttackWalker:
                 key = (trigger, name)
                 if key not in self.blocks:
                     continue
-                self.leaves, self.approx, self.modes = {}, False, set()
-                self.run(self.stmts(key), Fraction(1), 0, set(), False, {})
-                if self.leaves:
-                    return self.summary()
+                got = self._walk(key)
+                if got:
+                    return got
                 # an npc whose op handler only hands over to the ap handler
                 # (witches, mages) has its attacks there instead
                 if 'applayer2' not in self.modes:
                     break
+        return None
+
+    def range_profile(self, npc_name, category=None):
+        """What it can still do once you are out of its reach, which for most
+        monsters is nothing: reaching a player who is not adjacent needs an
+        [ai_applayer2] handler, and only the ranged, the casters and two of the
+        dragons have one.  The rest are the safespot.
+        """
+        for name in ([npc_name] + (['_' + category] if category else [])):
+            key = ('ai_applayer2', name)
+            if key in self.blocks:
+                return self._walk(key)
         return None
 
     def stmts(self, key):
@@ -567,6 +584,21 @@ def build_regen(b):
     return [ticks, amount]
 
 
+def _attack_entry(r, spells):
+    """One weighted attack of a monster's profile, as the pages read it."""
+    e = {'k': r['kind'], 'w': round(float(r['weight']), 6)}
+    if r['model']:
+        e['m'] = r['model']
+    if r['spell']:
+        name, speed = r['spell']
+        sp = spells.get(name)
+        e['sp'] = sp['name'] if sp else pretty(name or 'spell')
+        e['mh'] = sp['maxhit'] if sp else 0
+        if speed:
+            e['d'] = speed
+    return e
+
+
 def _mark_variants(items):
     """Flag the trimmed, gold and charged copies of an item the pages cannot tell apart.
 
@@ -631,8 +663,14 @@ def build_gear_data(b):
 
     # ---- items
     items = {}
+    placeholders = 0
     for it in b.items.values():
         if it['id'] is None or it['dummy'] or not it['wearpos']:
+            continue
+        # a handful of unfinished items carry 255 in every bonus as a placeholder.
+        # They are not real gear, and left in they win every comparison outright.
+        if all(_int(it['params'].get(k, 0)) == 255 for k in BONUS_KEYS):
+            placeholders += 1
             continue
         slot = WEARPOS.index(it['wearpos']) if it['wearpos'] in WEARPOS else None
         if slot is None:
@@ -656,6 +694,9 @@ def build_gear_data(b):
         lr = _int(it['params'].get('levelrequire', 0))
         if lr:
             rec['lr'] = lr
+        reach = _int(it['params'].get('attackrange', 0))
+        if reach:
+            rec['ar'] = reach        # ~player_attackrange, +2 on longrange
         items[it['id']] = rec
     _mark_variants(items)
 
@@ -674,23 +715,12 @@ def build_gear_data(b):
             stats[k] = _int(cfg['d'].get(k, 0))
         damagetype = constants.get(str(p.get('damagetype', '')).lstrip('^'), _int(p.get('damagetype', 2), 2))
         prof = walker.profile(n['name'], n['category'])
+        at_range = walker.range_profile(n['name'], n['category'])
         if prof is None:
             prof = ([{'kind': 'melee', 'model': None, 'spell': None, 'weight': Fraction(1)}], False)
         rows, approx = prof
         approx_count += 1 if approx else 0
-        atk = []
-        for r in rows:
-            e = {'k': r['kind'], 'w': round(float(r['weight']), 6)}
-            if r['model']:
-                e['m'] = r['model']
-            if r['spell']:
-                name, speed = r['spell']
-                sp = spells.get(name)
-                e['sp'] = sp['name'] if sp else pretty(name or 'spell')
-                e['mh'] = sp['maxhit'] if sp else 0
-                if speed:
-                    e['d'] = speed
-            atk.append(e)
+        atk = [_attack_entry(r, spells) for r in rows]
         monsters[n['id']] = {
             'n': n['display'], 'lv': n['level'], 'u': n['url'],
             'st': [stats['attack'], stats['strength'], stats['defence'], stats['magic'],
@@ -702,8 +732,10 @@ def build_gear_data(b):
             'atk': atk,
             'ic': 1 if b.has_npc_icon(n) else 0,
         }
+        if at_range:
+            monsters[n['id']]['ap'] = [_attack_entry(r, spells) for r in at_range[0]]
         if approx:
-            monsters[n['id']]['ap'] = 1
+            monsters[n['id']]['aprx'] = 1
         if n['category']:
             monsters[n['id']]['c'] = n['category']
 
@@ -736,6 +768,9 @@ def build_gear_data(b):
     with open(path, 'w', encoding='utf-8') as f:
         f.write('window.GEAR = ' + json.dumps(data, separators=(',', ':')) + ';\n')
     dups = sum(1 for r in items.values() if 'dup' in r)
-    return ('gear: %d equippable items (%d trimmed/charged copies folded away), %d monsters '
-            '(%d with an approximated attack profile), %d weapon style tables, %d hp per %d ticks'
-            % (len(items), dups, len(monsters), approx_count, len(style_tables), regen[1], regen[0]))
+    reach = sum(1 for m in monsters.values() if 'ap' in m)
+    return ('gear: %d equippable items (%d trimmed/charged copies folded away, %d placeholders dropped), '
+            '%d monsters (%d with an approximated attack profile, %d that can reach a safespot), '
+            '%d weapon style tables, %d hp per %d ticks'
+            % (len(items), dups, placeholders, len(monsters), approx_count, reach,
+               len(style_tables), regen[1], regen[0]))

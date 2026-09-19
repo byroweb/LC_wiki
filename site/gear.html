@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Equipment builder - Lost City Wiki</title><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="assets/style.css?v=1789800040"><script defer src="data/gear.js?v=1789800040"></script><script defer src="assets/combat.js?v=1789800040"></script><script defer src="assets/gear.js?v=1789800040"></script></head><body data-base=""><header class="top"><a class="brand" href="index.html">Lost City Wiki</a><nav><a href="map.html">World map</a><a href="graph.html">Knowledge graph</a><a href="chunks.html">Chunk picker</a><a href="gear.html">Equipment</a><a href="compare.html">Weapons</a><a href="npcs.html">NPCs</a><a href="items.html">Items</a><a href="areas.html">Areas</a><a href="quests.html">Quests</a><a href="shops.html">Shops</a><a href="tables.html">Drop tables</a></nav><div class="search"><input id="q" placeholder="Search the wiki..." autocomplete="off"><div class="results" id="q-results"></div></div></header><main><style>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Equipment builder - Lost City Wiki</title><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="assets/style.css?v=1789840604"><script defer src="data/gear.js?v=1789840604"></script><script defer src="assets/combat.js?v=1789840604"></script><script defer src="assets/gear.js?v=1789840604"></script></head><body data-base=""><header class="top"><a class="brand" href="index.html">Lost City Wiki</a><nav><a href="map.html">World map</a><a href="graph.html">Knowledge graph</a><a href="chunks.html">Chunk picker</a><a href="gear.html">Equipment</a><a href="compare.html">Weapons</a><a href="npcs.html">NPCs</a><a href="items.html">Items</a><a href="areas.html">Areas</a><a href="quests.html">Quests</a><a href="shops.html">Shops</a><a href="tables.html">Drop tables</a></nav><div class="search"><input id="q" placeholder="Search the wiki..." autocomplete="off"><div class="results" id="q-results"></div></div></header><main><style>
   .gear-cols { display: grid; grid-template-columns: 300px 1fr; gap: 18px; align-items: start; }
   .gear-panel { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 12px; }
   .gear-panel h3 { margin: 0 0 8px; }
@@ -49,6 +49,10 @@
   #msugg div { padding: 5px 9px; cursor: pointer; border-bottom: 1px solid #333; }
   #msugg div:hover, #msugg div.sel { background: var(--panel2); }
   .warn { color: #ffb0a0; }
+  .opt button { margin: 0 4px 4px 0; }
+  .opt button:disabled { opacity: .45; cursor: default; }
+  #optnote { margin-top: 6px; }
+  .safe { color: #9be59b; }
   @media (max-width: 800px) { .gear-cols { grid-template-columns: 1fr; } }
 </style>
 
@@ -62,6 +66,14 @@ watch the damage go both ways. Every number is worked out with the server's own 
     <div class="slotgrid" id="slots"></div>
     <div style="margin-top:10px">
       <button id="clear">Clear all</button>
+      <div id="optimise" class="opt">
+        <div class="small" style="margin:8px 0 4px">Fill the slots with the best you could wear against the
+          chosen monster, at the levels below:</div>
+        <button data-opt="dealt">Most damage dealt</button>
+        <button data-opt="taken">Least damage taken</button>
+        <button data-opt="ratio">Best of both</button>
+        <div id="optnote" class="small"></div>
+      </div>
       <label class="small" style="display:block;margin-top:8px"><input type="checkbox" id="f2p"> Free-to-play items only</label>
     </div>
   </div>
@@ -87,6 +99,8 @@ watch the damage go both ways. Every number is worked out with the server's own 
   <input type="text" id="mfind" placeholder="Search a monster (Green dragon, Hill giant, Guard...)" autocomplete="off">
   <div id="msugg"></div>
 </div>
+<label class="small" style="display:block;margin:8px 0"><input type="checkbox" id="safespot">
+  Safespotted &mdash; assume it cannot reach you, so only what it can do at range counts</label>
 <div id="fight"></div>
 
 <div id="picker"><div id="pickbox">
@@ -94,4 +108,4 @@ watch the damage go both ways. Every number is worked out with the server's own 
   <input type="text" id="pickfind" placeholder="Filter..." autocomplete="off">
   <div id="picklist"></div>
 </div></div>
-</main><footer>Generated from the LostCityRS <code>Content</code> repository, revision 254 (September 7, 2004). Game assets are the property of Jagex Ltd.</footer><script src="data/search.js?v=1789800040"></script><script src="assets/wiki.js?v=1789800040"></script></body></html>
+</main><footer>Generated from the LostCityRS <code>Content</code> repository, revision 254 (September 7, 2004). Game assets are the property of Jagex Ltd.</footer><script src="data/search.js?v=1789840604"></script><script src="assets/wiki.js?v=1789840604"></script></body></html>

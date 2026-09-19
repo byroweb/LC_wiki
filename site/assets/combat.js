@@ -123,6 +123,10 @@ var CB = (function () {
     var maxhit = ranged ? combatMaxhit(combatStat(effRanged, b[12]))
                         : combatMaxhit(combatStat(effStrength, b[10]));
     return {
+      // the set itself, so callers that care about a specific item being worn
+      // (dragonfire asks for the anti-dragon shield) read it from the set that
+      // was costed rather than from whatever the page happens to have on
+      equip: equip,
       weapon: weapon, bonuses: b, style: row, styleIndex: rows.indexOf(row),
       damagestyle: damagestyle, damagetype: damagetype, ranged: ranged,
       attackRolls: atk, defenceRolls: def, attackRoll: atk[Math.min(damagetype, 4)],
