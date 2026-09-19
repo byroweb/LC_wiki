@@ -163,7 +163,8 @@ function fight(mon, ps) {
   rows.forEach(function (r) { perAttack += r.weight * r.damage; cycle += r.weight * r.delay; });
   var taken = cycle > 0 ? perAttack / (cycle * TICK) : 0;
 
-  var dealtHit = hitChance(ps.attackRoll, npcDefenceRoll(mon, ps.damagetype));
+  // a bow with the wrong ammunition, or none, never gets as far as a hit roll
+  var dealtHit = ps.fires ? hitChance(ps.attackRoll, npcDefenceRoll(mon, ps.damagetype)) : 0;
   var capped = Math.min(ps.maxhit, mon.md);
   var dealt = dealtHit * (capped / 2) / (ps.rate * TICK);
   return {
@@ -202,9 +203,16 @@ function wearable(it) {
   return !(S.f2p && it.m);
 }
 
-/* The items in one slot worth considering, on the three axes that can matter:
+/* The items in one slot worth considering, on the three axes the fight reads:
  * the attack bonus this style rolls, the strength behind it, and the defence
- * against what is coming back.  Anything beaten on all three is dropped. */
+ * against what is coming back.  Anything beaten on all three is dropped.
+ *
+ * Weight is the tiebreak, not a fourth axis.  The fight is not the whole cost
+ * -- a rune chainbody stops nearly what a platebody does for 7lb and 15,000gp
+ * less, and that weight is run energy, which is the walk back -- but making it
+ * an axis of its own would leave almost nothing dominated, since nearly every
+ * item weighs something different, and the search went from 0.2s to 15s.  So
+ * it only separates items the fight genuinely cannot tell apart. */
 function slotCandidates(slot, dt, monDt, ranged, weapon) {
   var rows = CB.slotItems(slot).filter(function (r) {
     if (!wearable(r[1])) return false;
@@ -216,20 +224,53 @@ function slotCandidates(slot, dt, monDt, ranged, weapon) {
     return true;
   })
     .map(function (r) {
-      return { id: r[0], a: r[1].b[ATT_BONUS[dt]], s: r[1].b[ranged ? 12 : 10], d: r[1].b[DEF_BONUS[monDt]] };
+      return { id: r[0], a: r[1].b[ATT_BONUS[dt]], s: r[1].b[ranged ? 12 : 10],
+               d: r[1].b[DEF_BONUS[monDt]], w: r[1].w || 0 };
     });
-  rows.push({ id: null, a: 0, s: 0, d: 0 });              // wearing nothing
+  rows.push({ id: null, a: 0, s: 0, d: 0, w: 0 });         // wearing nothing
   var keep = rows.filter(function (x) {
     return !rows.some(function (y) {
-      return y !== x && y.a >= x.a && y.s >= x.s && y.d >= x.d && (y.a > x.a || y.s > x.s || y.d > x.d);
+      if (y === x) return false;
+      if (y.a >= x.a && y.s >= x.s && y.d >= x.d && (y.a > x.a || y.s > x.s || y.d > x.d)) return true;
+      // identical to the fight, so the lighter one stands in for both
+      return y.a === x.a && y.s === x.s && y.d === x.d && y.w < x.w;
     });
   });
   // the anti-dragon shield is never the best bonus, and is often the best shield
   if (slot === SLOT_SHIELD && G.antifireShield && keep.every(function (x) { return String(x.id) !== String(G.antifireShield); })) {
     var ads = item(G.antifireShield);
-    if (ads && wearable(ads)) keep.push({ id: String(G.antifireShield), a: 0, s: 0, d: 0 });
+    if (ads && wearable(ads)) keep.push({ id: String(G.antifireShield), a: 0, s: 0, d: 0, w: ads.w || 0 });
   }
   return keep;
+}
+
+/* Sets the objective cannot separate are separated by what else they cost, in
+ * order: the combat axis the mode is not looking at, then weight.
+ *
+ * Both steps matter.  "Most damage dealt" ignores damage taken, so a great many
+ * sets tie on it -- going straight to weight there would drop the anti-dragon
+ * shield, which weighs 5lb and quarters what a dragon does to you, for a set
+ * that deals exactly the same and takes four times as much.  And the tolerance
+ * is deliberate rather than an equality test: a rune chainbody taking a
+ * hundredth of a hitpoint a second more than a platebody is not worth 7lb and
+ * 15,000gp, and floating point would not call the two equal anyway. */
+var TIED = 0.005;                                   // half a percent
+
+function ties(x, y) {
+  if (x === y) return true;
+  if (!isFinite(x) || !isFinite(y)) return false;
+  return Math.abs(x - y) <= Math.max(Math.abs(x), Math.abs(y), 1e-9) * TIED;
+}
+
+function preferred(cand, best) {
+  if (!best) return true;
+  if (!ties(cand.v, best.v)) return cand.v > best.v;
+  // the objective calls them equal; the axis it was not looking at breaks it
+  var second = cand.mode === 'taken' ? [cand.dealt, best.dealt]      // more damage dealt
+                                     : [-cand.taken, -best.taken];  // less damage taken
+  if (!ties(second[0], second[1])) return second[0] > second[1];
+  if (cand.w !== best.w) return cand.w < best.w;    // then the lighter set
+  return cand.v > best.v;
 }
 
 function score(mode, dealt, taken) {
@@ -276,7 +317,7 @@ function optimise(mode) {
         var varies = pair[0] === SLOT_SHIELD || cs.some(function (c) { return c.a !== cs[0].a || c.s !== cs[0].s; });
         if (varies) { varying.push(pair); return; }
         var top = cs[0];
-        cs.forEach(function (c) { if (c.d > top.d) top = c; });
+        cs.forEach(function (c) { if (c.d > top.d || (c.d === top.d && c.w < top.w)) top = c; });
         if (top.id) base[pair[0]] = top.id;
       });
       var combos = [base];
@@ -300,10 +341,9 @@ function optimise(mode) {
           defence: prayerMultiplier('defence')
         });
         var f = fight(mon, ps);
-        var v = score(mode, f.dealt, f.taken);
-        if (!best || v > best.v || (v === best.v && f.dealt > best.dealt)) {
-          best = { v: v, eq: eq, style: si, dealt: f.dealt, taken: f.taken };
-        }
+        var cand = { v: score(mode, f.dealt, f.taken), w: ps.weight, eq: eq, style: si, mode: mode,
+                     dealt: f.dealt, taken: f.taken };
+        if (preferred(cand, best)) best = cand;
       });
     });
   });
@@ -316,6 +356,7 @@ function runOptimise(mode) {
     return;
   }
   var before = fight(G.monsters[S.monster], playerStats());
+  var beforeEq = S.eq;
   var best = optimise(mode);
   if (!best) return;
   S.eq = best.eq;
@@ -334,9 +375,11 @@ function runOptimise(mode) {
       : '');
   }
   el('optnote').innerHTML = 'Optimised for ' + label + ': <b>' + num(best.dealt, 2) + '</b> dealt, <b>' +
-    num(best.taken, 2) + '</b> taken a second' +
-    (before ? ' <span class="small">(was ' + num(before.dealt, 2) + ' / ' + num(before.taken, 2) + ')</span>' : '') +
-    extra;
+    num(best.taken, 2) + '</b> taken a second, <b>' + num(best.w / 1000, 2) + '</b> kg' +
+    (before ? ' <span class="small">(was ' + num(before.dealt, 2) + ' / ' + num(before.taken, 2) + ' / ' +
+      num(CB.weight(beforeEq) / 1000, 2) + ' kg)</span>' : '') +
+    extra + ' <div class="small">Sets within half a percent of each other are settled by weight, so the ' +
+    'lighter of two the fight cannot separate is the one you get.</div>';
 }
 
 // ------------------------------------------------------------------ rendering
@@ -424,7 +467,22 @@ function renderBonuses(ps) {
   other.push([G.bonusLabels[10], b[10]]);
   other.push([G.bonusLabels[12], b[12]]);
   other.push([G.bonusLabels[11], b[11]]);
-  el('bonuses').innerHTML = table('Attack bonus', atk) + table('Defence bonus', def) + table('Other', other);
+  el('bonuses').innerHTML = table('Attack bonus', atk) + table('Defence bonus', def) + table('Other', other) +
+    '<div><h3>The set itself</h3><table>' +
+      '<tr><td>Weight</td><td>' + num(CB.weight(S.eq) / 1000, 2) + ' kg</td></tr>' +
+      '<tr><td>Cost</td><td>' + setCost(S.eq).toLocaleString() + ' gp</td></tr>' +
+    '</table><div class="small" style="margin-top:6px">Each obj\'s own <code>weight=</code> and ' +
+    '<code>cost=</code>. How much run energy the weight costs you is engine-side, so the pages do not ' +
+    'put a number on it.</div></div>';
+}
+
+function setCost(equip) {
+  var total = 0;
+  for (var slot in equip) {
+    var it = item(equip[slot]);
+    if (it) total += it.v || 0;
+  }
+  return total;
 }
 
 function renderStyles(ps) {
@@ -451,12 +509,15 @@ function renderAttack(ps) {
   var weapon = item(S.eq[SLOT_WEAPON]);
   var ammo = item(S.eq[SLOT_AMMO]);
   if (ps.ranged && weapon && (weapon.cat === 'weapon_bow' || weapon.cat === 'weapon_crossbow')) {
-    if (!ammo) warn = '<p class="warn small">No ammunition in the quiver &ndash; a bow without arrows will not fire.</p>';
+    if (!ammo) warn = '<p class="warn small">No ammunition in the quiver &ndash; a bow without arrows will not ' +
+      'fire, so this set deals nothing.</p>';
     else if (!ammoFits(weapon, ammo)) warn = '<p class="warn small">' + esc(ammo.n) + ' does not fit a ' +
-      esc(weapon.n) + ', so its ranged strength is not counted and the shot will not fire.</p>';
+      esc(weapon.n) + ', so its ranged strength is not counted and the shot will not fire &ndash; ' +
+      'this set deals nothing.</p>';
     else if ((ammo.lr || 0) > (weapon.lr || 0)) warn = '<p class="warn small">' + esc(weapon.n) +
-      ' is not powerful enough for ' + esc(ammo.n) + ', so it will not fire &ndash; the ranged strength below ' +
-      'still counts, because <code>~equip_get_bonuses</code> only checks that the ammo is the right kind.</p>';
+      ' is not powerful enough for ' + esc(ammo.n) + ', so it will not fire and this set deals nothing &ndash; ' +
+      'the ranged strength below still counts, because <code>~equip_get_bonuses</code> only checks that the ' +
+      'ammo is the right kind, while <code>~player_ranged_check_ammo</code> compares the two level gates.</p>';
   }
   var req = unmetRequirements();
   if (req.length) warn += '<p class="warn small">You could not wear this yet: ' + req.map(esc).join('; ') + '.</p>';

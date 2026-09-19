@@ -54,11 +54,37 @@ var CB = (function () {
 
   function ammoFits(weapon, ammo) {
     // ~equip_get_bonuses only counts the quiver's ranged strength when the ammo
-    // suits the weapon (or when nothing is wielded at all)
+    // suits the weapon (or when nothing is wielded at all).  The ogre bow is
+    // singled out in [proc,player_ranged_check_ammo]: it takes ogre arrows and
+    // refuses ordinary ones, and every other bow does the reverse.
     if (!weapon) return true;
-    if (weapon.cat === 'weapon_bow') return ammo.cat === 'arrows';
+    if (weapon.cat === 'weapon_bow') return ammo.cat === (weapon.oa ? 'ogre_arrows' : 'arrows');
     if (weapon.cat === 'weapon_crossbow') return ammo.cat === 'bolts';
     return false;
+  }
+
+  /* [proc,player_ranged_check_ammo].  It returns null in four cases and the
+   * caller answers with p_stopaction, so a shot that fails any of them is not
+   * a weaker shot -- it never happens, and the set deals nothing at all.
+   * Thrown weapons are their own ammunition and never fail. */
+  function canFire(equip, damagetype) {
+    if (damagetype !== DT_RANGED) return true;
+    var weapon = item(equip[SLOT_WEAPON]);
+    if (!weapon || (weapon.cat !== 'weapon_bow' && weapon.cat !== 'weapon_crossbow')) return true;
+    var ammo = item(equip[SLOT_AMMO]);
+    if (!ammo) return false;                             // nothing in the quiver
+    if (!ammoFits(weapon, ammo)) return false;           // wrong kind of ammunition
+    return (ammo.lr || 0) <= (weapon.lr || 0);           // "not powerful enough for those arrows"
+  }
+
+  /* What a set weighs, in grams, from each obj's own `weight=`. */
+  function weight(equip) {
+    var total = 0;
+    for (var slot in equip) {
+      var it = item(equip[slot]);
+      if (it) total += it.w || 0;
+    }
+    return total;
   }
 
   /* Sum the worn set the way ~equip_get_bonuses does.  `equip` is {slot: id}. */
@@ -129,6 +155,7 @@ var CB = (function () {
       equip: equip,
       weapon: weapon, bonuses: b, style: row, styleIndex: rows.indexOf(row),
       damagestyle: damagestyle, damagetype: damagetype, ranged: ranged,
+      fires: canFire(equip, damagetype), weight: weight(equip),
       attackRolls: atk, defenceRolls: def, attackRoll: atk[Math.min(damagetype, 4)],
       maxhit: maxhit, rate: attackRate(weapon, row)
     };
@@ -152,10 +179,10 @@ var CB = (function () {
   /* Damage a second this set deals to one monster, and the pieces behind it. */
   function dealt(ps, mon) {
     var defence = npcDefenceRoll(mon, ps.damagetype);
-    var chance = hitChance(ps.attackRoll, defence);
+    var chance = ps.fires ? hitChance(ps.attackRoll, defence) : 0;
     var capped = Math.min(ps.maxhit, mon.md);   // npc_param(max_dealt)
     return {
-      defenceRoll: defence, hit: chance, maxhit: capped,
+      defenceRoll: defence, hit: chance, maxhit: capped, fires: ps.fires,
       dps: chance * (capped / 2) / (ps.rate * TICK)
     };
   }
@@ -166,6 +193,7 @@ var CB = (function () {
     DT_STAB: DT_STAB, DT_SLASH: DT_SLASH, DT_CRUSH: DT_CRUSH, DT_RANGED: DT_RANGED, DT_MAGIC: DT_MAGIC,
     effectiveStat: effectiveStat, combatStat: combatStat, combatMaxhit: combatMaxhit,
     hitChance: hitChance, item: item, slotItems: slotItems, ammoFits: ammoFits, bonuses: bonuses,
+    canFire: canFire, weight: weight,
     styleRows: styleRows, attackRate: attackRate, playerStats: playerStats,
     playerDefenceRoll: playerDefenceRoll, npcDefenceRoll: npcDefenceRoll, dealt: dealt
   };
