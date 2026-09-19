@@ -623,24 +623,34 @@
   renderLevels();
   document.getElementById('zin').onclick = function () { state.zoom = Math.min(8, state.zoom * 1.5); draw(); };
   document.getElementById('zout').onclick = function () { state.zoom = Math.max(0.25, state.zoom / 1.5); draw(); };
-  document.getElementById('reset').onclick = function () {
-    // a clean slate: the spawn chunk goes too, so reset really does leave nothing
-    // selected, and the ticks go with it rather than carrying someone else's
-    // progress into the new run.  "clear ticks" still clears those on their own.
-    state.unlocked = new Set();
+  /* Reset and Random both start a run over; they differ only in what you start
+   * it with.  Neither adds to the run in progress -- rolling a chunk is asking
+   * where to begin, and a roll that kept the last one would be a list of two.
+   * Clicking squares is still how a run grows.
+   *
+   * The ticks go with the chunks because they are the run's progress and not any
+   * one chunk's: they key on items, npcs and tasks, so carrying them over would
+   * open the new chunk with half its checklist already ticked off.  "Clear
+   * ticks" still clears those on their own. */
+  function startRun(chunks, centre) {
+    state.unlocked = new Set(chunks);
     ticked = {};
     saveTicks();
-    // go() syncs, which saves the empty run: forgetting it instead would let the
-    // next load fall back to the default and put the spawn chunk straight back.
-    go(START);
+    // go() syncs, which saves the run: forgetting it instead would let the next
+    // load fall back to the default and put the spawn chunk straight back.
+    go(centre);
+  }
+  document.getElementById('reset').onclick = function () {
+    startRun([], START);        // the spawn chunk goes too, so reset leaves nothing
   };
   document.getElementById('rand').onclick = function () {
+    // the pool leaves out what is already unlocked, so a roll always moves you
     var pool = Object.keys(D.chunks).filter(function (ck) {
       return !state.unlocked.has(ck) && hasContent(ck);
     });
     if (!pool.length) return;
     var ck = pool[Math.floor(Math.random() * pool.length)];
-    state.unlocked.add(ck); go(ck);
+    startRun([ck], ck);
   };
   function go(ck) {
     var p = chunkXZ(ck);
