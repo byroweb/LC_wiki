@@ -37,13 +37,6 @@ function pct(n) { return (n > 0 ? '+' : '') + num(n, 1) + '%'; }
 
 // ------------------------------------------------------------------ setups
 
-function slotItems(slot) {
-  var out = [];
-  for (var id in G.items) if (G.items[id].s === slot) out.push([id, G.items[id]]);
-  out.sort(function (x, y) { return x[1].n.localeCompare(y[1].n); });
-  return out;
-}
-
 function equipFor(side) {
   var eq = {};
   for (var slot in S.kit) if (S.kit[slot]) eq[slot] = S.kit[slot];
@@ -78,7 +71,7 @@ function needsAmmo(side) {
 
 function fillWeapon(side) {
   var sel = el('w' + side.toUpperCase());
-  sel.innerHTML = '<option value="">(unarmed)</option>' + slotItems(SLOT_WEAPON).map(function (r) {
+  sel.innerHTML = '<option value="">(unarmed)</option>' + CB.slotItems(SLOT_WEAPON).map(function (r) {
     return '<option value="' + r[0] + '"' + (S[side].weapon === r[0] ? ' selected' : '') + '>' +
       esc(r[1].n) + '</option>';
   }).join('');
@@ -102,7 +95,7 @@ function fillAmmo(side) {
   wrap.style.display = needsAmmo(side) ? '' : 'none';
   if (!needsAmmo(side)) { S[side].ammo = null; return; }
   var w = CB.item(S[side].weapon);
-  var list = slotItems(SLOT_AMMO).filter(function (r) { return CB.ammoFits(w, r[1]); });
+  var list = CB.slotItems(SLOT_AMMO).filter(function (r) { return CB.ammoFits(w, r[1]); });
   if (!list.length) { S[side].ammo = null; return; }
   if (!S[side].ammo || !list.some(function (r) { return r[0] === S[side].ammo; })) {
     // default to the hardest-hitting ammo the bow can actually fire
@@ -153,7 +146,7 @@ function fillKit() {
   var labels = {};
   G.slots.forEach(function (s) { labels[s[0]] = s[2]; });
   el('kit').innerHTML = KIT_SLOTS.map(function (slot) {
-    var opts = ['<option value="">(nothing)</option>'].concat(slotItems(slot).map(function (r) {
+    var opts = ['<option value="">(nothing)</option>'].concat(CB.slotItems(slot).map(function (r) {
       return '<option value="' + r[0] + '"' + (S.kit[slot] === r[0] ? ' selected' : '') + '>' + esc(r[1].n) + '</option>';
     }));
     return '<div><label>' + esc(labels[slot] || ('Slot ' + slot)) + '</label>' +
@@ -173,7 +166,7 @@ function bestKit(bonusIndex) {
   var kit = {};
   KIT_SLOTS.forEach(function (slot) {
     var best = null;
-    slotItems(slot).forEach(function (r) {
+    CB.slotItems(slot).forEach(function (r) {
       if (!best || r[1].b[bonusIndex] > CB.item(best).b[bonusIndex]) best = r[0];
     });
     if (best && CB.item(best).b[bonusIndex] > 0) kit[slot] = best;
@@ -245,9 +238,9 @@ function warnings(A, B) {
     if (!ps.ranged && ps.damagetype === CB.DT_RANGED)
       out.push(pair[0] + ': that style is ranged but the weapon is not.');
     var req = w.req, missing = [];
+    // quests are left to the reader; only the level gates are checked
     if (req) for (var k in req) {
-      if (k === 'quest') missing.push(req.quest);
-      else if ((S.lv[k] || 1) < req[k]) missing.push(k + ' ' + req[k]);
+      if (k !== 'quest' && (S.lv[k] || 1) < req[k]) missing.push(k + ' ' + req[k]);
     }
     if (missing.length) out.push(pair[0] + ': ' + esc(w.n) + ' needs ' + missing.map(esc).join(' + ') + '.');
   });

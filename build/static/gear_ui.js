@@ -143,6 +143,9 @@ function npcAttack(mon, entry, ps) {
            note: note, breath: true };
 }
 
+/* The hitpoints [timer,health_regen] restores each second. */
+function regenPerSecond() { return G.regen[1] / (G.regen[0] * TICK); }
+
 function fight(mon, ps) {
   var rows = mon.atk.map(function (e) {
     var a = npcAttack(mon, e, ps);
@@ -159,7 +162,9 @@ function fight(mon, ps) {
   return {
     rows: rows, taken: taken, dealt: dealt, dealtHit: dealtHit, capped: capped,
     ttk: dealt > 0 ? mon.st[5] / dealt : Infinity,
-    survive: taken > 0 ? S.lv.hitpoints / taken : Infinity
+    // [timer,health_regen] puts hitpoints back while the fight runs
+    regen: regenPerSecond(),
+    survive: taken > regenPerSecond() ? S.lv.hitpoints / (taken - regenPerSecond()) : Infinity
   };
 }
 
@@ -301,8 +306,8 @@ function unmetRequirements() {
     if (!it.req) return;
     var missing = [];
     for (var k in it.req) {
-      if (k === 'quest') { missing.push(it.req.quest); continue; }
-      if ((S.lv[k] || 1) < it.req[k]) missing.push(k + ' ' + it.req[k]);
+      // quests are left to the reader; only the level gates are checked
+      if (k !== 'quest' && (S.lv[k] || 1) < it.req[k]) missing.push(k + ' ' + it.req[k]);
     }
     if (missing.length) out.push(it.n + ' needs ' + missing.join(' + '));
   });
@@ -334,7 +339,8 @@ function renderFight(ps) {
       box(num(f.dealt, 2), 'damage a second dealt', num(f.dealtHit * 100, 1) + '% of swings land, max ' + f.capped) +
       box(time(f.ttk), 'to kill it', mon.st[5] + ' hitpoints') +
       box(num(f.taken, 2), 'damage a second taken', 'across its attack profile') +
-      box(time(f.survive), 'until you drop', S.lv.hitpoints + ' hitpoints, no food') +
+      box(time(f.survive), 'until you drop', S.lv.hitpoints + ' hitpoints, no food, regen ' +
+          num(f.regen * 60, 2).replace(/\.?0+$/, '') + ' hp a minute') +
     '</div>' +
     '<h3>What it throws at you</h3>' +
     '<table class="data"><thead><tr><th>Attack</th><th>Share</th><th>Max hit</th><th>Lands</th>' +
@@ -360,15 +366,7 @@ function renderAll(redrawSlots) {
 var pickSlot = null;
 
 function slotItems(slot) {
-  var out = [];
-  for (var id in G.items) {
-    var it = G.items[id];
-    if (it.s !== slot) continue;
-    if (S.f2p && it.m) continue;
-    out.push([id, it]);
-  }
-  out.sort(function (a, b) { return a[1].n.localeCompare(b[1].n); });
-  return out;
+  return CB.slotItems(slot).filter(function (r) { return !(S.f2p && r[1].m); });
 }
 
 function bonusSummary(it) {
@@ -399,7 +397,7 @@ function fillPicker(q) {
     var req = '';
     if (it.req) {
       var bits = [];
-      for (var k in it.req) bits.push(k === 'quest' ? it.req.quest : k + ' ' + it.req[k]);
+      for (var k in it.req) if (k !== 'quest') bits.push(k + ' ' + it.req[k]);
       req = ' <span class="req">(' + esc(bits.join(', ')) + ')</span>';
     }
     return '<div class="row" data-id="' + id + '">' + (it.ic ? itemIcon(id) : '') +
