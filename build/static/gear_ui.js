@@ -167,12 +167,24 @@ function fight(mon, ps) {
   var dealtHit = ps.fires ? hitChance(ps.attackRoll, npcDefenceRoll(mon, ps.damagetype)) : 0;
   var capped = Math.min(ps.maxhit, mon.md);
   var dealt = dealtHit * (capped / 2) / (ps.rate * TICK);
+  var ttk = dealt > 0 ? mon.st[5] / dealt : Infinity;
+  // [timer,health_regen] puts hitpoints back while the fight runs, so what a
+  // kill really costs is what it lands on you less what you get back over the
+  // same stretch.  That is the number that says whether the defence levels for
+  // better armour are worth having: kill it fast enough and they buy nothing.
+  var regen = regenPerSecond();
+  var net = taken - regen;
+  var survive = net > 0 ? S.lv.hitpoints / net : Infinity;
   return {
     rows: rows, taken: taken, dealt: dealt, dealtHit: dealtHit, capped: capped,
-    ttk: dealt > 0 ? mon.st[5] / dealt : Infinity,
-    // [timer,health_regen] puts hitpoints back while the fight runs
-    regen: regenPerSecond(),
-    survive: taken > regenPerSecond() ? S.lv.hitpoints / (taken - regenPerSecond()) : Infinity
+    ttk: ttk, regen: regen, survive: survive,
+    // null where there is no such thing as a kill: nothing you do hurts it, or
+    // it drops you before you get there.  Both are worth saying out loud rather
+    // than reporting as a number.
+    perKill: !(ttk < Infinity) || survive < ttk ? null : Math.max(0, net) * ttk,
+    // an average over many kills, not a promise about any one of them
+    kills: !(ttk < Infinity) || survive < ttk ? null
+           : (net > 0 ? S.lv.hitpoints / (net * ttk) : Infinity)
   };
 }
 
@@ -531,6 +543,23 @@ function renderAttack(ps) {
     '</div>' + warn;
 }
 
+/* What one kill costs you, which is the question behind "is the defence level
+ * for better armour worth it".  Kill it fast enough and the answer is no. */
+function perKillBox(f) {
+  if (f.perKill === null) {
+    var why = f.dealt > 0
+      ? 'you drop after ' + time(f.survive) + ', and it takes ' + time(f.ttk) + ' to kill'
+      : (f.ttk === Infinity && f.dealt === 0 ? 'this set cannot hurt it at all' : 'no kill to average over');
+    return box('n/a', 'hitpoints a kill', why);
+  }
+  if (f.perKill === 0) {
+    return box('0', 'hitpoints a kill', 'it cannot out-damage your regen, so a kill is free');
+  }
+  var sub = f.kills === Infinity ? 'no food needed'
+    : 'about ' + (f.kills < 10 ? num(f.kills, 1) : Math.round(f.kills)) + ' kills before you drop';
+  return box(num(f.perKill, 1), 'hitpoints a kill', sub);
+}
+
 function unmetRequirements() {
   var out = [];
   worn().forEach(function (pair) {
@@ -573,6 +602,7 @@ function renderFight(ps) {
       box(num(f.taken, 2), 'damage a second taken', 'across its attack profile') +
       box(time(f.survive), 'until you drop', S.lv.hitpoints + ' hitpoints, no food, regen ' +
           num(f.regen * 60, 2).replace(/\.?0+$/, '') + ' hp a minute') +
+      perKillBox(f) +
     '</div>' +
     '<h3>What it throws at you</h3>' +
     '<table class="data"><thead><tr><th>Attack</th><th>Share</th><th>Max hit</th><th>Lands</th>' +
@@ -581,7 +611,10 @@ function renderFight(ps) {
       ? '<p class="small safe">Safespotted, it cannot touch you: reaching a player who is not adjacent needs an ' +
         '<code>[ai_applayer2]</code> handler and this one has none, so there is no melee and no breath.</p>' : '') +
     (mon.aprx ? '<p class="small">Its combat script branches on something other than a die roll, so the shares ' +
-      'above split those branches evenly.</p>' : '');
+      'above split those branches evenly.</p>' : '') +
+    '<p class="small">Hitpoints a kill is an average over many kills, net of regen, and not a promise about ' +
+    'any one of them: every number here is an expected value, so a run of bad rolls can still take you out ' +
+    'well before the average says it should.</p>';
 }
 
 function renderAll(redrawSlots) {
