@@ -16,17 +16,28 @@ var item = CB.item, ammoFits = CB.ammoFits;
 
 // ------------------------------------------------------------------ state
 
+var OFF = -1;                           // no prayer chosen for a slot
+
+// the protection slot holds protect_melee / protect_ranged / protect_magic
+function matchesKind(p, kind) {
+  return kind === 'protect' ? p[3].indexOf('protect_') === 0 : p[3] === kind;
+}
+
 var S = {
   eq: {},                             // slot -> item id
-  lv: { attack: 70, strength: 70, defence: 70, ranged: 70, magic: 50, hitpoints: 70 },
-  pray: { attack: 0, strength: 0, defence: 0, protect: 0 },   // 0 = off, else the varp
+  lv: { attack: 70, strength: 70, defence: 70, ranged: 70, magic: 50, hitpoints: 70, prayer: 43 },
+  // Thick Skin lives in %prayer0, so "off" cannot be 0 as well -- it is -1, and
+  // every read compares the varp *and* the kind, so a varp meant for another
+  // slot is ignored rather than switching something on
+  pray: { attack: OFF, strength: OFF, defence: OFF, protect: OFF },
   antifire: false,
   f2p: false,
   safespot: false,
   style: 0,
   monster: null
 };
-var LEVEL_KEYS = ['attack', 'strength', 'defence', 'ranged', 'magic', 'hitpoints'];
+// the hash writes these by position, so new ones go on the end and old links still read
+var LEVEL_KEYS = ['attack', 'strength', 'defence', 'ranged', 'magic', 'hitpoints', 'prayer'];
 
 // ------------------------------------------------------------------ items
 
@@ -49,13 +60,44 @@ function attackRate() {
 }
 
 function prayerMultiplier(kind) {
-  if (!S.pray[kind]) return 100;
+  if (S.pray[kind] === OFF) return 100;
   var varp = S.pray[kind], mult = 100;
   G.prayers.forEach(function (p) { if (p[0] === varp && p[3] === kind) mult = p[4]; });
   return mult;
 }
+/* What the prayers you have on cost, from [timer,prayer_drain].
+ *
+ * The counter climbs by the drain effect every tick and sheds one prayer point
+ * for every whole `resistance` it reaches, so over a fight it settles at
+ * `effect / resistance` points a tick whatever the timer's own period -- the
+ * period only decides how lumpy the loss is.  Resistance is 60 + twice your
+ * equipment prayer bonus, which is why a holy symbol is worth wearing: at +8 it
+ * is 76 instead of 60, and everything you have on lasts a quarter longer.
+ *
+ * The drain effect is 3 for the first-tier prayers, 6 for the second, 12 for the
+ * third and for every protection prayer, so Protect from Melee alone with no
+ * bonus is 12/60 = a point every five ticks, or one every three seconds. */
+function prayerDrainEffect() {
+  var total = 0;
+  ['attack', 'strength', 'defence', 'protect'].forEach(function (kind) {
+    var varp = S.pray[kind];
+    if (varp === OFF) return;
+    G.prayers.forEach(function (p) { if (p[0] === varp && matchesKind(p, kind)) total += p[5] || 0; });
+  });
+  return total;
+}
+
+function prayerPerSecond(prayerBonus) {
+  var effect = prayerDrainEffect();
+  if (!effect) return 0;
+  var d = G.prayerDrain;
+  // the script floors the comparison at the base, so nothing drains faster than bare
+  var resist = Math.max(d.base + (prayerBonus || 0) * d.perBonus, d.base);
+  return effect / resist / TICK;
+}
+
 function protecting(style) {
-  if (!S.pray.protect) return false;
+  if (S.pray.protect === OFF) return false;
   var on = false;
   G.prayers.forEach(function (p) { if (p[0] === S.pray.protect && p[3] === 'protect_' + style) on = true; });
   return on;
@@ -184,7 +226,24 @@ function fight(mon, ps) {
     perKill: !(ttk < Infinity) || survive < ttk ? null : Math.max(0, net) * ttk,
     // an average over many kills, not a promise about any one of them
     kills: !(ttk < Infinity) || survive < ttk ? null
-           : (net > 0 ? S.lv.hitpoints / (net * ttk) : Infinity)
+           : (net > 0 ? S.lv.hitpoints / (net * ttk) : Infinity),
+    prayer: prayerCost(ps, ttk)
+  };
+}
+
+/* The other thing a kill spends.  Unlike hitpoints this one is not gated on
+ * surviving: running the bar dry is its own way for a trip to end, and it is
+ * worth seeing even on a fight you would lose, so the only n/a here is a
+ * monster you cannot kill at all. */
+function prayerCost(ps, ttk) {
+  var rate = prayerPerSecond(ps.bonuses[11]);
+  var lasts = rate > 0 ? S.lv.prayer / rate : Infinity;
+  return {
+    effect: prayerDrainEffect(), rate: rate, lasts: lasts,
+    perKill: ttk < Infinity ? rate * ttk : null,
+    kills: rate > 0 ? (ttk < Infinity ? S.lv.prayer / (rate * ttk) : null) : Infinity,
+    // the bar goes before the monster does, and the protection goes with it
+    outFirst: lasts < ttk
   };
 }
 
@@ -447,23 +506,38 @@ function renderLevels() {
 function renderPrayers() {
   var kinds = [['attack', 'Attack'], ['strength', 'Strength'], ['defence', 'Defence']];
   var html = kinds.map(function (k) {
-    var opts = ['<option value="0">None</option>'];
+    var opts = ['<option value="' + OFF + '">None</option>'];
     G.prayers.filter(function (p) { return p[3] === k[0]; }).forEach(function (p) {
       opts.push('<option value="' + p[0] + '"' + (S.pray[k[0]] === p[0] ? ' selected' : '') + '>' +
         esc(p[1]) + ' (+' + (p[4] - 100) + '%, level ' + p[2] + ')</option>');
     });
     return '<label>' + k[1] + '<select data-pray="' + k[0] + '">' + opts.join('') + '</select></label>';
   });
-  var opts = ['<option value="0">None</option>'];
+  var opts = ['<option value="' + OFF + '">None</option>'];
   G.prayers.filter(function (p) { return p[3].indexOf('protect_') === 0; }).forEach(function (p) {
     opts.push('<option value="' + p[0] + '"' + (S.pray.protect === p[0] ? ' selected' : '') + '>' +
       esc(p[1]) + ' (level ' + p[2] + ')</option>');
   });
   html.push('<label>Protection<select data-pray="protect">' + opts.join('') + '</select></label>');
-  el('prayers').innerHTML = html.join('');
+  el('prayers').innerHTML = html.join('') + prayerDrainNote();
   Array.prototype.forEach.call(el('prayers').querySelectorAll('select'), function (s) {
     s.onchange = function () { S.pray[s.dataset.pray] = +s.value; save(); renderAll(false); };
   });
+}
+
+/* What the prayers cost while they are on, before any monster is picked. */
+function prayerDrainNote() {
+  var effect = prayerDrainEffect();
+  if (!effect) return '<div class="small" style="grid-column:1/-1;margin-top:6px">Nothing on, nothing draining.</div>';
+  var bonus = CB.bonuses(S.eq)[11];
+  var rate = prayerPerSecond(bonus);
+  var d = G.prayerDrain;
+  return '<div class="small" style="grid-column:1/-1;margin-top:6px">Draining <b>' + num(rate, 2) +
+    '</b> prayer points a second &mdash; a bar of ' + S.lv.prayer + ' lasts ' + time(S.lv.prayer / rate) +
+    '. <span class="sub2">Drain effect ' + effect + ' over a resistance of ' +
+    (d.base + bonus * d.perBonus) + ' (' + d.base + ' + ' + d.perBonus + ' &times; ' + bonus +
+    ' prayer bonus)' + (bonus > 0 ? '' : ' &mdash; prayer bonus on your gear would stretch it') +
+    '.</span></div>';
 }
 
 function renderBonuses(ps) {
@@ -533,6 +607,8 @@ function renderAttack(ps) {
   }
   var req = unmetRequirements();
   if (req.length) warn += '<p class="warn small">You could not wear this yet: ' + req.map(esc).join('; ') + '.</p>';
+  var pray = unmetPrayers();
+  if (pray.length) warn += '<p class="warn small">You could not use this yet: ' + pray.map(esc).join('; ') + '.</p>';
   el('attack').innerHTML =
     '<div class="stats">' +
       box(rate + ' ticks', 'attack speed', num(rate * TICK, 1) + ' seconds a swing') +
@@ -560,6 +636,20 @@ function perKillBox(f) {
   return box(num(f.perKill, 1), 'hitpoints a kill', sub);
 }
 
+/* What one kill spends of the prayer bar, which is the other half of "armour
+ * and food, or prayer gear and a few fast kills". */
+function prayerBox(f) {
+  var p = f.prayer;
+  if (!p.effect) return box('&mdash;', 'prayer points a kill', 'no prayers on');
+  if (p.perKill === null) return box('n/a', 'prayer points a kill', 'there is no kill to spend it on');
+  var sub;
+  if (p.outFirst) sub = '<span class="warn">the bar runs dry after ' + time(p.lasts) +
+    ', ' + time(f.ttk) + ' into the kill</span>';
+  else sub = 'about ' + (p.kills < 10 ? num(p.kills, 1) : Math.round(p.kills)) +
+    ' kills on a full bar of ' + S.lv.prayer;
+  return box(num(p.perKill, 1), 'prayer points a kill', sub);
+}
+
 function unmetRequirements() {
   var out = [];
   worn().forEach(function (pair) {
@@ -571,6 +661,20 @@ function unmetRequirements() {
       if (k !== 'quest' && (S.lv[k] || 1) < it.req[k]) missing.push(k + ' ' + it.req[k]);
     }
     if (missing.length) out.push(it.n + ' needs ' + missing.join(' + '));
+  });
+  return out;
+}
+
+function unmetPrayers() {
+  var out = [];
+  ['attack', 'strength', 'defence', 'protect'].forEach(function (kind) {
+    var varp = S.pray[kind];
+    if (varp === OFF) return;
+    G.prayers.forEach(function (p) {
+      if (p[0] === varp && matchesKind(p, kind) && S.lv.prayer < p[2]) {
+        out.push(p[1] + ' needs prayer ' + p[2]);
+      }
+    });
   });
   return out;
 }
@@ -603,6 +707,7 @@ function renderFight(ps) {
       box(time(f.survive), 'until you drop', S.lv.hitpoints + ' hitpoints, no food, regen ' +
           num(f.regen * 60, 2).replace(/\.?0+$/, '') + ' hp a minute') +
       perKillBox(f) +
+      prayerBox(f) +
     '</div>' +
     '<h3>What it throws at you</h3>' +
     '<table class="data"><thead><tr><th>Attack</th><th>Share</th><th>Max hit</th><th>Lands</th>' +
@@ -740,7 +845,7 @@ function save() {
   var eq = G.slots.map(function (s) { return S.eq[s[0]] || ''; }).join('.');
   if (eq.replace(/\./g, '')) parts.push('eq=' + eq);
   parts.push('lv=' + LEVEL_KEYS.map(function (k) { return S.lv[k]; }).join('.'));
-  parts.push('pr=' + [S.pray.attack, S.pray.strength, S.pray.defence, S.pray.protect].join('.'));
+  parts.push('pr2=' + [S.pray.attack, S.pray.strength, S.pray.defence, S.pray.protect].join('.'));
   if (S.style) parts.push('st=' + S.style);
   if (S.antifire) parts.push('af=1');
   if (S.safespot) parts.push('ss=1');
@@ -761,8 +866,13 @@ function load() {
     else if (k === 'lv') v.split('.').forEach(function (n, i2) {
       if (LEVEL_KEYS[i2]) S.lv[LEVEL_KEYS[i2]] = Math.max(1, Math.min(99, parseInt(n, 10) || 1));
     });
-    else if (k === 'pr') { var p = v.split('.').map(Number);
-      S.pray.attack = p[0] || 0; S.pray.strength = p[1] || 0; S.pray.defence = p[2] || 0; S.pray.protect = p[3] || 0; }
+    // `pr` was the old key, written when "off" was 0 -- which is Thick Skin's own
+    // varp, so an old link cannot be read back without inventing a prayer. It is
+    // ignored, and prayers come up off, which is what they defaulted to anyway.
+    else if (k === 'pr2') { var p = v.split('.').map(Number);
+      var pick = function (n) { return isNaN(n) ? OFF : n; };
+      S.pray.attack = pick(p[0]); S.pray.strength = pick(p[1]);
+      S.pray.defence = pick(p[2]); S.pray.protect = pick(p[3]); }
     else if (k === 'st') S.style = parseInt(v, 10) || 0;
     else if (k === 'af') S.antifire = v === '1';
     else if (k === 'ss') S.safespot = v === '1';

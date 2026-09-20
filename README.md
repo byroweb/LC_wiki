@@ -195,7 +195,21 @@ also works in most browsers because every data file is a plain `.js` file.
   rune goes on at 40, 28.3 at 60 and 25.5 at 80 -- the first forty levels turn
   dying into killing and the next forty are worth eight hitpoints. Every figure
   is an expected value, so a run of bad rolls can still end a trip the average
-  says was safe. The whole set-up lives in the URL,
+  says was safe.
+  **Prayer points a kill** is the other half of that sum, and the two together
+  answer "armour and food, or prayer gear and a handful of fast kills".
+  `[timer,prayer_drain]` climbs a counter by the drain effect every tick and
+  sheds a point for every whole *resistance* it reaches, so it settles at
+  `effect / resistance` points a tick: 3 for the first-tier prayers, 6 for the
+  second, 12 for the third and for every protection prayer, over a resistance of
+  `60 + 2 x` your equipment prayer bonus (equip.rs2). Protect from Melee bare is
+  12/60, a point every three seconds; a holy symbol at +8 makes it 3.8. The
+  protection prayers already set the damage to zero the way
+  `[proc,check_protect_prayer]` does, so against a lesser demon in rune the page
+  reads 9.8 hitpoints a kill and no prayer, or 0 hitpoints and 16.1 prayer with
+  Protect from Melee -- and in monk robes and a holy symbol, 0 hitpoints and 9.9
+  prayer, which is 4.4 kills on a bar of 43 against rune's 2.7. When the bar
+  would empty mid-fight the box says when instead of pretending otherwise. The whole set-up lives in the URL,
   so a build can be shared.
   An **optimise** button fills the slots with the best set you could wear against
   the chosen monster, for most damage dealt, least damage taken, or the best of
