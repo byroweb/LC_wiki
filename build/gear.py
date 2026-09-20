@@ -342,14 +342,55 @@ def build_requirements(b):
 
 # ---------------------------------------------------------------- prayers
 
+def build_prayer_drain(b):
+    """How fast prayer runs out, from the three pieces of content that decide it.
+
+    [timer,prayer_drain] runs every 5 ticks and adds `drain effect * 5` to a
+    counter, then takes off one prayer point for every whole `resistance` the
+    counter has reached.  So over a fight it settles at `effect / resistance`
+    points a tick, whatever the timer's period, and the period only decides how
+    lumpy that is.  Resistance is `60 + prayer bonus * 2`, set in equip.rs2.
+
+    Each prayer's effect is [enum,prayer_drain_effects]: 3 for the first-tier
+    prayers, 6 for the second, 12 for the third and for the protection prayers.
+    All three are read rather than assumed, and a mismatch is a build error.
+    """
+    blk = b.blocks.get(('timer', 'prayer_drain'))
+    if not blk:
+        raise SystemExit('gear: [timer,prayer_drain] not found - the prayer drain model needs updating')
+    for pattern in (r'%prayer_drain_counter\s*=\s*calc\(%prayer_drain_effect\s*\*\s*5',
+                    r'divide\(%prayer_drain_counter,\s*%prayer_drain_resistance\)'):
+        if not re.search(pattern, blk['body']):
+            raise SystemExit('gear: %s no longer matches [timer,prayer_drain] (%s) - update '
+                             'build_prayer_drain in build/gear.py' % (pattern, blk['file']))
+
+    equip = common.read_text(os.path.join(common.SCRIPTS, 'player', 'scripts', 'equip.rs2'))
+    m = re.search(r'%prayer_drain_resistance\s*=\s*add\((\d+),\s*multiply\(\$prayerbonus,\s*(\d+)\)\)', equip)
+    if not m:
+        raise SystemExit('gear: equip.rs2 no longer sets %prayer_drain_resistance from the prayer bonus - '
+                         'update build_prayer_drain in build/gear.py')
+
+    enums = common.parse_config_files('enum')
+    cfg = enums.get('prayer_drain_effects')
+    if not cfg or not cfg['multi'].get('val'):
+        raise SystemExit('gear: [enum,prayer_drain_effects] not found - the prayer drain model needs updating')
+    effects = {}
+    for row in cfg['multi']['val']:
+        const, _, val = row.partition(',')
+        effects[const.strip().lstrip('^')] = _int(val)
+    return effects, int(m.group(1)), int(m.group(2))
+
+
 def build_prayers(b, constants):
-    """[[varp, name, level, kind, multiplier]] for the prayers the fight maths reads.
+    """[[varp, name, level, kind, multiplier, drain effect]] for the prayers the fight maths reads.
 
     Which varp a prayer lives in is its place in the prayer book rather than its
     ^constant, so it is read from the prayer's own activate label, which names
     both: `~get_prayer_data(^prayer_rockskin)` next to `%prayer3`.
     """
+    effects, _, _ = build_prayer_drain(b)
     varp_of = {}
+    drain_of = {}
     for key, blk in b.blocks.items():
         if key[0] != 'label' or not key[1].startswith('activate_prayer_'):
             continue
@@ -357,6 +398,7 @@ def build_prayers(b, constants):
         varp = re.search(r'%prayer(\d+)', blk['body'])
         if const and varp:
             varp_of[const.group(1)] = int(varp.group(1))
+            drain_of[int(varp.group(1))] = effects.get(const.group(1), 0)
     names = {}
     for cfg in b.dbrow_cfg.values():
         if cfg['d'].get('table') != 'prayers':
@@ -376,12 +418,12 @@ def build_prayers(b, constants):
         for varp, mult in re.findall(r'%prayer(\d+) = \^true\) return \((\d+)\)', blk['body']):
             varp = int(varp)
             name, level = names.get(varp, ('Prayer %d' % varp, 1))
-            out.append([varp, name, level, kind, int(mult)])
+            out.append([varp, name, level, kind, int(mult), drain_of.get(varp, 0)])
     blk = b.blocks.get(('proc', 'check_protect_prayer'))
     for style, varp in re.findall(r'\$style = \^([a-z_]+)[^)]*\) & %prayer(\d+) = \^true', blk['body']):
         varp = int(varp)
         name, level = names.get(varp, ('Prayer %d' % varp, 1))
-        out.append([varp, name, level, 'protect_' + style.replace('_style', ''), 100])
+        out.append([varp, name, level, 'protect_' + style.replace('_style', ''), 100, drain_of.get(varp, 0)])
     out.sort(key=lambda r: r[2])
     return out
 
@@ -758,6 +800,31 @@ def _check_breath(b):
                                  % (pattern, spec['proc'], blk['file']))
 
 
+def _weight_swaps(b):
+    """Items the server swaps for a lighter form the moment you put them on.
+
+    [proc,update_weight_equipment] trades the boots of lightness you carry for
+    the worn pair the moment you wear them on a members' map, and back again in
+    free-to-play.  The two are separate objs with separate weights -- the worn
+    pair is the one item in the content with a negative `weight=`, ten pounds
+    off -- so a picker listing both offers the same boots twice over, one of
+    them at a weight nobody ever actually walks around with.  The pairs come out
+    of the proc rather than a list here, and an empty result is a build error:
+    the proc's own comment says it will grow "when more weight reduction
+    equipment exists", so it is meant to be read, not guessed at.
+    """
+    blk = b.blocks.get(('proc', 'update_weight_equipment'))
+    if not blk:
+        raise SystemExit('gear: [proc,update_weight_equipment] not found - the worn-form swap needs updating')
+    pairs = re.findall(r'inv_total\(worn,\s*(\w+)\)\s*>\s*0\s*&\s*map_members\s*=\s*\^true.*?'
+                       r'inv_setslot\(worn,\s*\^wearpos_\w+,\s*(\w+),\s*1\)',
+                       blk['body'], re.S)
+    if not pairs:
+        raise SystemExit('gear: [proc,update_weight_equipment] (%s) no longer swaps a carried obj for a worn '
+                         'one - update _weight_swaps in build/gear.py' % blk['file'])
+    return dict(pairs)
+
+
 def _check_ammo_rule(b):
     """Re-read the bow/ammo gate the pages model, so it cannot go stale.
 
@@ -791,6 +858,7 @@ def build_gear_data(b):
     cat2table, style_tables, style_bonuses, default_style_bonus = build_styles(b, constants)
     reqs = build_requirements(b)
     prayers = build_prayers(b, constants)
+    _, drain_base, drain_per_bonus = build_prayer_drain(b)
     regen = build_regen(b)
     spells = build_spells(b, constants)
 
@@ -842,6 +910,14 @@ def build_gear_data(b):
         items[it['id']] = rec
         cfgnames[it['id']] = it['name']
     _mark_variants(items, cfgnames)
+    # what you wear is the worn form, so that is the one the pickers should offer
+    by_cfg = {name: iid for iid, name in cfgnames.items()}
+    swapped = 0
+    for carried, worn in _weight_swaps(b).items():
+        a, z = by_cfg.get(carried), by_cfg.get(worn)
+        if a is not None and z is not None and a != z:
+            items[a]['dup'] = z
+            swapped += 1
     renamed = _disambiguate(items, cfgnames)
 
     # ---- monsters
@@ -903,6 +979,8 @@ def build_gear_data(b):
         'styleBonusDefault': default_style_bonus,
         'unarmed': 'weapon_unarmed_table',
         'prayers': prayers,
+        # points a tick = drain effect / (base + bonus * perBonus)
+        'prayerDrain': {'base': drain_base, 'perBonus': drain_per_bonus},
         'breaths': {k: {kk: vv for kk, vv in v.items() if kk != 'checks'} for k, v in BREATHS.items()},
         'items': items,
         'monsters': monsters,
