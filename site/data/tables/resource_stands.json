@@ -4,7 +4,7 @@
   "content_path": "source/content",
   "coordinates": "absolute world tiles {level,x,z}; 0_50_50_21_18 -> level 0, x 3221, z 3218",
   "covers": "clusters of trees, rocks and fishing spots (Chebyshev gap 6) and of attackable NPC spawns (gap 8)",
-  "date": "2026-09-20",
+  "date": "2026-09-21",
   "not_covered": "resources that only exist as script-spawned objects; depleted-stage rocks/stumps are counted as their live loc",
   "revision": "254",
   "revision_date": "September 7, 2004",

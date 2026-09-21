@@ -919,7 +919,7 @@ class Build:
     def page(self, title, body, depth, extra_head=''):
         base = '../' * depth
         nav = ''.join('<a href="%s%s">%s</a>' % (base, u, t) for u, t in [
-            ('map.html', 'World map'), ('graph.html', 'Knowledge graph'), ('chunks.html', 'Chunk picker'), ('gear.html', 'Equipment'), ('compare.html', 'Weapons'), ('npcs.html', 'NPCs'), ('items.html', 'Items'),
+            ('map.html', 'World map'), ('graph.html', 'Knowledge graph'), ('chunks.html', 'Chunk picker'), ('gear.html', 'Equipment'), ('compare.html', 'Weapons'), ('pvp.html', 'PvP'), ('npcs.html', 'NPCs'), ('items.html', 'Items'),
             ('areas.html', 'Areas'), ('quests.html', 'Quests'), ('shops.html', 'Shops'), ('tables.html', 'Drop tables')])
         return ('<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>%s - Lost City Wiki</title>'
                 '<meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="%sassets/style.css?v=%s">%s</head>'
@@ -1033,14 +1033,18 @@ class Build:
         self.log('pages written')
 
     def write_tool_pages(self):
-        """The equipment builder and the weapon comparison: the wiki chrome around
-        their static bodies, both fed by data/gear.js and assets/combat.js."""
-        for rel, title, script in (('gear.html', 'Equipment builder', 'gear'),
-                                   ('compare.html', 'Weapon comparison', 'compare')):
+        """The equipment builder, the weapon comparison and player-vs-player: the
+        wiki chrome around their static bodies, all fed by data/gear.js and
+        assets/combat.js, and the two that build a player also by assets/player.js."""
+        for rel, title, script, player in (('gear.html', 'Equipment builder', 'gear', True),
+                                           ('compare.html', 'Weapon comparison', 'compare', False),
+                                           ('pvp.html', 'Player vs player', 'pvp', True)):
             head = ('<script defer src="data/gear.js?v=%s"></script>'
                     '<script defer src="assets/combat.js?v=%s"></script>'
-                    '<script defer src="assets/%s.js?v=%s"></script>'
-                    % (self.stamp, self.stamp, script, self.stamp))
+                    % (self.stamp, self.stamp))
+            if player:
+                head += '<script defer src="assets/player.js?v=%s"></script>' % self.stamp
+            head += '<script defer src="assets/%s.js?v=%s"></script>' % (script, self.stamp)
             body = read_text(os.path.join(STATIC, '%s_body.html' % script))
             self.write(rel, self.page(title, body, 0, head))
 
@@ -1363,6 +1367,7 @@ class Build:
         counts = [('map.html', len(self.npc_spawns) + len(self.obj_spawns), 'map markers', 'World map explorer'),
                   ('graph.html', 0, '', 'Knowledge graph'), ('chunks.html', 0, '', 'Chunk picker'),
                   ('gear.html', 0, '', 'Equipment builder'), ('compare.html', 0, '', 'Weapon comparison'),
+                  ('pvp.html', 0, '', 'Player vs player'),
                   ('npcs.html', len(self.npcs), 'NPCs', 'NPC index'),
                   ('items.html', len([i for i in self.items.values() if not i['dummy']]), 'items', 'Item index'),
                   ('areas.html', len(self.areas), 'areas', 'Area index'), ('quests.html', len(self.quests), 'quests', 'Quest index'),
@@ -1436,6 +1441,8 @@ class Build:
         shutil.copy(os.path.join(STATIC, 'gear_ui.js'), os.path.join(SITE, 'assets', 'gear.js'))
         shutil.copy(os.path.join(STATIC, 'compare_ui.js'), os.path.join(SITE, 'assets', 'compare.js'))
         shutil.copy(os.path.join(STATIC, 'combat.js'), os.path.join(SITE, 'assets', 'combat.js'))
+        shutil.copy(os.path.join(STATIC, 'player.js'), os.path.join(SITE, 'assets', 'player.js'))
+        shutil.copy(os.path.join(STATIC, 'pvp_ui.js'), os.path.join(SITE, 'assets', 'pvp.js'))
         # stamp asset URLs so browsers pick up rebuilt scripts/styles instead of cached copies
         stamp = str(int(time.time()))
         self.stamp = stamp

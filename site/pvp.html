@@ -1,0 +1,41 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Player vs player - Lost City Wiki</title><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="assets/style.css?v=1789962704"><script defer src="data/gear.js?v=1789962704"></script><script defer src="assets/combat.js?v=1789962704"></script><script defer src="assets/player.js?v=1789962704"></script><script defer src="assets/pvp.js?v=1789962704"></script></head><body data-base=""><header class="top"><a class="brand" href="index.html">Lost City Wiki</a><nav><a href="map.html">World map</a><a href="graph.html">Knowledge graph</a><a href="chunks.html">Chunk picker</a><a href="gear.html">Equipment</a><a href="compare.html">Weapons</a><a href="pvp.html">PvP</a><a href="npcs.html">NPCs</a><a href="items.html">Items</a><a href="areas.html">Areas</a><a href="quests.html">Quests</a><a href="shops.html">Shops</a><a href="tables.html">Drop tables</a></nav><div class="search"><input id="q" placeholder="Search the wiki..." autocomplete="off"><div class="results" id="q-results"></div></div></header><main><style>
+  .pvp-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 10px 0; }
+  .stats .box { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; }
+  .stats .box b { display: block; font-size: 23px; color: var(--accent); line-height: 1.25; }
+  .stats .box .sub2 { font-size: 11.5px; color: var(--muted); }
+  .verdict { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 12px 14px; margin: 10px 0; }
+  .verdict b.win { color: #9be59b; } .verdict b.lose { color: #ffb0a0; }
+  .side h3 { margin: 14px 0 4px; }
+  .warn { color: #ffb0a0; }
+  #sweep { overflow-x: auto; }   /* eight columns: the table scrolls, the page does not */
+  table.data td.cur, table.data tr.cur td { background: #343026; }
+  table.data td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  @media (max-width: 900px) { .pvp-cols { grid-template-columns: 1fr; } }
+</style>
+
+<h1>Player vs player</h1>
+<div class="sub">Two players, built the same way as on the equipment page, and the damage going both ways
+between them &mdash; with the two things a fight between players does differently: the defender's own
+defence roll, and a protection prayer that cuts the hit rather than stopping it.</div>
+
+<div class="pvp-cols">
+  <div id="you"></div>
+  <div id="them"></div>
+</div>
+
+<h2>The fight</h2>
+<div id="verdict" class="verdict"></div>
+<div class="pvp-cols">
+  <div class="side" id="side-a"></div>
+  <div class="side" id="side-b"></div>
+</div>
+<p class="small" id="notes"></p>
+
+<h2>Every weapon you could wield against them</h2>
+<div class="small">Your armour, levels and prayers as set above, with each weapon you meet the level for
+in the weapon slot &mdash; a two-hander puts your shield down, a bow fires what is in your quiver &mdash;
+and each of its styles. Sorted by the damage a second it does to them. Your current weapon and style is
+highlighted.</div>
+<div id="sweep"></div>
+</main><footer>Generated from the LostCityRS <code>Content</code> repository, revision 254 (September 7, 2004). Game assets are the property of Jagex Ltd.</footer><script src="data/search.js?v=1789962704"></script><script src="assets/wiki.js?v=1789962704"></script></body></html>

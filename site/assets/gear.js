@@ -16,100 +16,24 @@ var item = CB.item, ammoFits = CB.ammoFits;
 
 // ------------------------------------------------------------------ state
 
-var OFF = -1;                           // no prayer chosen for a slot
+// The player -- equipment, levels, prayers, style -- is a PP state, and the
+// panel from assets/player.js draws and edits it.  What only this page needs
+// (a potion, a monster, whether you are safespotted) goes alongside.
+var S = PP.newState();
+S.antifire = false;
+S.safespot = false;
+S.monster = null;
+var panel = null;
 
-// the protection slot holds protect_melee / protect_ranged / protect_magic
-function matchesKind(p, kind) {
-  return kind === 'protect' ? p[3].indexOf('protect_') === 0 : p[3] === kind;
-}
-
-var S = {
-  eq: {},                             // slot -> item id
-  lv: { attack: 70, strength: 70, defence: 70, ranged: 70, magic: 50, hitpoints: 70, prayer: 43 },
-  // Thick Skin lives in %prayer0, so "off" cannot be 0 as well -- it is -1, and
-  // every read compares the varp *and* the kind, so a varp meant for another
-  // slot is ignored rather than switching something on
-  pray: { attack: OFF, strength: OFF, defence: OFF, protect: OFF },
-  antifire: false,
-  f2p: false,
-  safespot: false,
-  style: 0,
-  monster: null
-};
-// the hash writes these by position, so new ones go on the end and old links still read
-var LEVEL_KEYS = ['attack', 'strength', 'defence', 'ranged', 'magic', 'hitpoints', 'prayer'];
-
-// ------------------------------------------------------------------ items
-
-function itemIcon(id, cls) {
-  var it = item(id);
-  if (!it || !it.ic) return '';
-  return '<img class="' + (cls || '') + '" src="icons/items/' + id + '.png" alt="">';
-}
-function worn() {
-  var out = [];
-  for (var slot in S.eq) if (S.eq[slot]) out.push([+slot, item(S.eq[slot])]);
-  return out;
-}
-
-function bonuses() { return CB.bonuses(S.eq); }
-function styleRows() { return CB.styleRows(item(S.eq[SLOT_WEAPON])); }
-function attackRate() {
-  var rows = styleRows();
-  return CB.attackRate(item(S.eq[SLOT_WEAPON]), rows[Math.min(S.style, rows.length - 1)]);
-}
-
-function prayerMultiplier(kind) {
-  if (S.pray[kind] === OFF) return 100;
-  var varp = S.pray[kind], mult = 100;
-  G.prayers.forEach(function (p) { if (p[0] === varp && p[3] === kind) mult = p[4]; });
-  return mult;
-}
-/* What the prayers you have on cost, from [timer,prayer_drain].
- *
- * The counter climbs by the drain effect every tick and sheds one prayer point
- * for every whole `resistance` it reaches, so over a fight it settles at
- * `effect / resistance` points a tick whatever the timer's own period -- the
- * period only decides how lumpy the loss is.  Resistance is 60 + twice your
- * equipment prayer bonus, which is why a holy symbol is worth wearing: at +8 it
- * is 76 instead of 60, and everything you have on lasts a quarter longer.
- *
- * The drain effect is 3 for the first-tier prayers, 6 for the second, 12 for the
- * third and for every protection prayer, so Protect from Melee alone with no
- * bonus is 12/60 = a point every five ticks, or one every three seconds. */
-function prayerDrainEffect() {
-  var total = 0;
-  ['attack', 'strength', 'defence', 'protect'].forEach(function (kind) {
-    var varp = S.pray[kind];
-    if (varp === OFF) return;
-    G.prayers.forEach(function (p) { if (p[0] === varp && matchesKind(p, kind)) total += p[5] || 0; });
-  });
-  return total;
-}
-
-function prayerPerSecond(prayerBonus) {
-  var effect = prayerDrainEffect();
-  if (!effect) return 0;
-  var d = G.prayerDrain;
-  // the script floors the comparison at the base, so nothing drains faster than bare
-  var resist = Math.max(d.base + (prayerBonus || 0) * d.perBonus, d.base);
-  return effect / resist / TICK;
-}
-
-function protecting(style) {
-  if (S.pray.protect === OFF) return false;
-  var on = false;
-  G.prayers.forEach(function (p) { if (p[0] === S.pray.protect && p[3] === 'protect_' + style) on = true; });
-  return on;
-}
-
-function playerStats() {
-  return CB.playerStats(S.eq, S.lv, S.style, {
-    attack: prayerMultiplier('attack'),
-    strength: prayerMultiplier('strength'),
-    defence: prayerMultiplier('defence')
-  });
-}
+// The names the rest of this file has always used, now answered by the kit.
+function playerStats() { return PP.stats(S); }
+function protecting(style) { return PP.protecting(S, style); }
+function prayerMultiplier(kind) { return PP.prayerMultiplier(S, kind); }
+function prayerDrainEffect() { return PP.prayerDrainEffect(S); }
+function prayerPerSecond(bonus) { return PP.prayerPerSecond(S, bonus); }
+function wearable(it) { return PP.wearable(S, it); }
+function unmetRequirements() { return PP.unmetRequirements(S); }
+function unmetPrayers() { return PP.unmetPrayers(S); }
 
 function playerDefenceRoll(ps, damagetype) { return CB.playerDefenceRoll(ps, damagetype); }
 
@@ -268,11 +192,6 @@ function prayerCost(ps, ttk) {
 var ATT_BONUS = [0, 1, 2, 4, 3], DEF_BONUS = [5, 6, 7, 9, 8];
 var KIT_SLOTS = [0, 1, 2, 4, 5, 7, 9, 10, 12, 13];
 
-function wearable(it) {
-  var req = it.req || {};
-  for (var k in req) if (k !== 'quest' && (S.lv[k] || 1) < req[k]) return false;
-  return !(S.f2p && it.m);
-}
 
 /* The items in one slot worth considering, on the three axes the fight reads:
  * the attack bonus this style rolls, the strength behind it, and the defence
@@ -467,78 +386,9 @@ function time(s) {
 }
 
 // the equipment screen's layout: three columns, blanks where the game leaves gaps
-var LAYOUT = [[null, 0, null], [1, 2, 13], [3, 4, 5], [null, 7, null], [9, 10, 12]];
 
-function renderSlots() {
-  var labels = {};
-  G.slots.forEach(function (s) { labels[s[0]] = s[2]; });
-  var html = '';
-  LAYOUT.forEach(function (row) {
-    row.forEach(function (slot) {
-      if (slot === null) { html += '<div class="slot empty-cell"></div>'; return; }
-      var id = S.eq[slot], it = item(id);
-      html += '<div class="slot' + (it ? ' filled' : '') + '" data-slot="' + slot + '" title="' +
-        esc(labels[slot] || '') + '">' +
-        (it ? itemIcon(id) + '<span class="nm">' + esc(it.n) + '</span>'
-            : '<span class="nm">' + esc(labels[slot] || '') + '</span>') + '</div>';
-    });
-  });
-  el('slots').innerHTML = html;
-  Array.prototype.forEach.call(el('slots').querySelectorAll('.slot[data-slot]'), function (d) {
-    d.onclick = function () { openPicker(+d.dataset.slot); };
-  });
-}
 
-function renderLevels() {
-  el('levels').innerHTML = LEVEL_KEYS.map(function (k) {
-    return '<label>' + k.charAt(0).toUpperCase() + k.slice(1) +
-      '<input type="number" min="1" max="99" data-lv="' + k + '" value="' + S.lv[k] + '"></label>';
-  }).join('');
-  Array.prototype.forEach.call(el('levels').querySelectorAll('input'), function (i) {
-    i.onchange = i.oninput = function () {
-      var v = parseInt(i.value, 10);
-      S.lv[i.dataset.lv] = isNaN(v) ? 1 : Math.max(1, Math.min(99, v));
-      save(); renderAll(false);
-    };
-  });
-}
 
-function renderPrayers() {
-  var kinds = [['attack', 'Attack'], ['strength', 'Strength'], ['defence', 'Defence']];
-  var html = kinds.map(function (k) {
-    var opts = ['<option value="' + OFF + '">None</option>'];
-    G.prayers.filter(function (p) { return p[3] === k[0]; }).forEach(function (p) {
-      opts.push('<option value="' + p[0] + '"' + (S.pray[k[0]] === p[0] ? ' selected' : '') + '>' +
-        esc(p[1]) + ' (+' + (p[4] - 100) + '%, level ' + p[2] + ')</option>');
-    });
-    return '<label>' + k[1] + '<select data-pray="' + k[0] + '">' + opts.join('') + '</select></label>';
-  });
-  var opts = ['<option value="' + OFF + '">None</option>'];
-  G.prayers.filter(function (p) { return p[3].indexOf('protect_') === 0; }).forEach(function (p) {
-    opts.push('<option value="' + p[0] + '"' + (S.pray.protect === p[0] ? ' selected' : '') + '>' +
-      esc(p[1]) + ' (level ' + p[2] + ')</option>');
-  });
-  html.push('<label>Protection<select data-pray="protect">' + opts.join('') + '</select></label>');
-  el('prayers').innerHTML = html.join('') + prayerDrainNote();
-  Array.prototype.forEach.call(el('prayers').querySelectorAll('select'), function (s) {
-    s.onchange = function () { S.pray[s.dataset.pray] = +s.value; save(); renderAll(false); };
-  });
-}
-
-/* What the prayers cost while they are on, before any monster is picked. */
-function prayerDrainNote() {
-  var effect = prayerDrainEffect();
-  if (!effect) return '<div class="small" style="grid-column:1/-1;margin-top:6px">Nothing on, nothing draining.</div>';
-  var bonus = CB.bonuses(S.eq)[11];
-  var rate = prayerPerSecond(bonus);
-  var d = G.prayerDrain;
-  return '<div class="small" style="grid-column:1/-1;margin-top:6px">Draining <b>' + num(rate, 2) +
-    '</b> prayer points a second &mdash; a bar of ' + S.lv.prayer + ' lasts ' + time(S.lv.prayer / rate) +
-    '. <span class="sub2">Drain effect ' + effect + ' over a resistance of ' +
-    (d.base + bonus * d.perBonus) + ' (' + d.base + ' + ' + d.perBonus + ' &times; ' + bonus +
-    ' prayer bonus)' + (bonus > 0 ? '' : ' &mdash; prayer bonus on your gear would stretch it') +
-    '.</span></div>';
-}
 
 function renderBonuses(ps) {
   var b = ps.bonuses;
@@ -571,18 +421,6 @@ function setCost(equip) {
   return total;
 }
 
-function renderStyles(ps) {
-  var rows = styleRows();
-  var weapon = item(S.eq[SLOT_WEAPON]);
-  var types = G.damagetypes;
-  el('styles').innerHTML = rows.map(function (r, i) {
-    return '<button data-style="' + i + '" class="' + (i === Math.min(S.style, rows.length - 1) ? 'on' : '') + '">' +
-      esc(r[0]) + ' <span class="small">(' + esc(types[r[2]]) + ')</span></button>';
-  }).join('') + ' <span class="small">' + (weapon ? esc(weapon.cat || 'no category') : 'unarmed') + '</span>';
-  Array.prototype.forEach.call(el('styles').querySelectorAll('button'), function (btn) {
-    btn.onclick = function () { S.style = +btn.dataset.style; save(); renderAll(false); };
-  });
-}
 
 function box(value, label, sub) {
   return '<div class="box"><b>' + value + '</b>' + esc(label) +
@@ -650,34 +488,7 @@ function prayerBox(f) {
   return box(num(p.perKill, 1), 'prayer points a kill', sub);
 }
 
-function unmetRequirements() {
-  var out = [];
-  worn().forEach(function (pair) {
-    var it = pair[1];
-    if (!it.req) return;
-    var missing = [];
-    for (var k in it.req) {
-      // quests are left to the reader; only the level gates are checked
-      if (k !== 'quest' && (S.lv[k] || 1) < it.req[k]) missing.push(k + ' ' + it.req[k]);
-    }
-    if (missing.length) out.push(it.n + ' needs ' + missing.join(' + '));
-  });
-  return out;
-}
 
-function unmetPrayers() {
-  var out = [];
-  ['attack', 'strength', 'defence', 'protect'].forEach(function (kind) {
-    var varp = S.pray[kind];
-    if (varp === OFF) return;
-    G.prayers.forEach(function (p) {
-      if (p[0] === varp && matchesKind(p, kind) && S.lv.prayer < p[2]) {
-        out.push(p[1] + ' needs prayer ' + p[2]);
-      }
-    });
-  });
-  return out;
-}
 
 function renderFight(ps) {
   var mon = S.monster && G.monsters[S.monster];
@@ -722,85 +533,19 @@ function renderFight(ps) {
     'well before the average says it should.</p>';
 }
 
-function renderAll(redrawSlots) {
-  if (redrawSlots !== false) renderSlots();
-  var rows = styleRows();
-  if (S.style >= rows.length) S.style = 0;
+function renderAll(redrawPlayer) {
+  // the panel already redrew whatever it changed; only a change made here
+  // (the optimiser filling the slots, a link loading) needs it redrawn whole
+  if (redrawPlayer !== false && panel) panel.render();
   var ps = playerStats();
-  renderStyles(ps);
   renderBonuses(ps);
   renderAttack(ps);
   renderFight(ps);
-  if (redrawSlots !== false) { renderLevels(); renderPrayers(); }
 }
 
-// ------------------------------------------------------------------ the item picker
 
-var pickSlot = null;
 
-function slotItems(slot) {
-  return CB.slotItems(slot).filter(function (r) { return !(S.f2p && r[1].m); });
-}
 
-function bonusSummary(it) {
-  var parts = [];
-  for (var i = 0; i < 13; i++) if (it.b[i]) parts.push(G.bonusKeys[i].replace('attack', ' att').replace('defence', ' def') + ' ' + signed(it.b[i]));
-  if (it.s === SLOT_WEAPON) parts.unshift(it.r + 't');
-  return parts.slice(0, 4).join(', ');
-}
-
-function openPicker(slot) {
-  pickSlot = slot;
-  var labels = {};
-  G.slots.forEach(function (s) { labels[s[0]] = s[2]; });
-  el('picktitle').textContent = 'Choose: ' + (labels[slot] || 'item');
-  el('pickfind').value = '';
-  el('picker').classList.add('on');
-  fillPicker('');
-  el('pickfind').focus();
-}
-function closePicker() { el('picker').classList.remove('on'); pickSlot = null; }
-
-function fillPicker(q) {
-  q = q.toLowerCase();
-  var list = slotItems(pickSlot).filter(function (r) { return !q || r[1].n.toLowerCase().indexOf(q) >= 0; });
-  var html = '<div class="row" data-id=""><span class="nm">(nothing)</span></div>';
-  html += list.slice(0, 400).map(function (r) {
-    var id = r[0], it = r[1];
-    var req = '';
-    if (it.req) {
-      var bits = [];
-      for (var k in it.req) if (k !== 'quest') bits.push(k + ' ' + it.req[k]);
-      req = ' <span class="req">(' + esc(bits.join(', ')) + ')</span>';
-    }
-    return '<div class="row" data-id="' + id + '">' + (it.ic ? itemIcon(id) : '') +
-      '<span>' + esc(it.n) + (it.m ? ' <span class="tag members">mem</span>' : '') + req + '</span>' +
-      '<span class="b">' + esc(bonusSummary(it)) + '</span></div>';
-  }).join('');
-  el('picklist').innerHTML = html;
-  Array.prototype.forEach.call(el('picklist').querySelectorAll('.row'), function (d) {
-    d.onclick = function () { choose(d.dataset.id); };
-  });
-}
-
-function choose(id) {
-  var slot = pickSlot;
-  if (!id) delete S.eq[slot];
-  else {
-    S.eq[slot] = id;
-    var it = item(id);
-    // a two-handed weapon covers the shield slot, and a shield pushes one off
-    if (it.c && it.c.indexOf(SLOT_SHIELD) >= 0) delete S.eq[SLOT_SHIELD];
-    if (slot === SLOT_SHIELD) {
-      var w = item(S.eq[SLOT_WEAPON]);
-      if (w && w.c && w.c.indexOf(SLOT_SHIELD) >= 0) delete S.eq[SLOT_WEAPON];
-    }
-    if (slot === SLOT_WEAPON) S.style = 0;
-  }
-  closePicker();
-  save();
-  renderAll();
-}
 
 // ------------------------------------------------------------------ the monster search
 
@@ -841,15 +586,9 @@ function monsterSuggest(q) {
 var loading = false;
 function save() {
   if (loading) return;
-  var parts = [];
-  var eq = G.slots.map(function (s) { return S.eq[s[0]] || ''; }).join('.');
-  if (eq.replace(/\./g, '')) parts.push('eq=' + eq);
-  parts.push('lv=' + LEVEL_KEYS.map(function (k) { return S.lv[k]; }).join('.'));
-  parts.push('pr2=' + [S.pray.attack, S.pray.strength, S.pray.defence, S.pray.protect].join('.'));
-  if (S.style) parts.push('st=' + S.style);
+  var parts = [PP.toHash(S)];
   if (S.antifire) parts.push('af=1');
   if (S.safespot) parts.push('ss=1');
-  if (S.f2p) parts.push('f2p=1');
   if (S.monster) parts.push('m=' + S.monster);
   history.replaceState(null, '', '#' + parts.join('&'));
 }
@@ -857,26 +596,12 @@ function save() {
 function load() {
   loading = true;
   var h = location.hash.replace(/^#/, '');
+  PP.fromHash(S, h);
   h.split('&').forEach(function (kv) {
     var i = kv.indexOf('='); if (i < 0) return;
     var k = kv.slice(0, i), v = kv.slice(i + 1);
-    if (k === 'eq') v.split('.').forEach(function (id, n) {
-      if (id && G.items[id] && G.slots[n]) S.eq[G.slots[n][0]] = id;
-    });
-    else if (k === 'lv') v.split('.').forEach(function (n, i2) {
-      if (LEVEL_KEYS[i2]) S.lv[LEVEL_KEYS[i2]] = Math.max(1, Math.min(99, parseInt(n, 10) || 1));
-    });
-    // `pr` was the old key, written when "off" was 0 -- which is Thick Skin's own
-    // varp, so an old link cannot be read back without inventing a prayer. It is
-    // ignored, and prayers come up off, which is what they defaulted to anyway.
-    else if (k === 'pr2') { var p = v.split('.').map(Number);
-      var pick = function (n) { return isNaN(n) ? OFF : n; };
-      S.pray.attack = pick(p[0]); S.pray.strength = pick(p[1]);
-      S.pray.defence = pick(p[2]); S.pray.protect = pick(p[3]); }
-    else if (k === 'st') S.style = parseInt(v, 10) || 0;
-    else if (k === 'af') S.antifire = v === '1';
+    if (k === 'af') S.antifire = v === '1';
     else if (k === 'ss') S.safespot = v === '1';
-    else if (k === 'f2p') S.f2p = v === '1';
     else if (k === 'm' && G.monsters[v]) S.monster = v;
   });
   loading = false;
@@ -886,13 +611,8 @@ function load() {
 
 function init() {
   load();
-  el('clear').onclick = function () { S.eq = {}; S.style = 0; save(); renderAll(); };
-  el('f2p').checked = S.f2p;
-  el('f2p').onchange = function () {
-    S.f2p = el('f2p').checked;
-    if (S.f2p) for (var slot in S.eq) { var it = item(S.eq[slot]); if (it && it.m) delete S.eq[slot]; }
-    save(); renderAll();
-  };
+  panel = new PP.Panel({ root: el('player'), state: S, label: 'You',
+                         onChange: function () { save(); renderAll(false); } });
   el('antifire').checked = S.antifire;
   el('antifire').onchange = function () { S.antifire = el('antifire').checked; save(); renderAll(false); };
   el('safespot').checked = S.safespot;
@@ -900,12 +620,8 @@ function init() {
   Array.prototype.forEach.call(el('optimise').querySelectorAll('button'), function (btn) {
     btn.onclick = function () { runOptimise(btn.dataset.opt); };
   });
-  el('pickclose').onclick = closePicker;
-  el('picker').onclick = function (e) { if (e.target === el('picker')) closePicker(); };
-  el('pickfind').oninput = function () { fillPicker(el('pickfind').value); };
   el('mfind').oninput = function () { monsterSuggest(el('mfind').value); };
   el('mfind').onfocus = function () { monsterSuggest(el('mfind').value); };
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closePicker(); });
   if (S.monster) el('mfind').value = G.monsters[S.monster].n;
   renderAll();
 }

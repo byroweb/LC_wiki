@@ -4,7 +4,7 @@
   "content_path": "source/content",
   "coordinates": "absolute world tiles {level,x,z}; 0_50_50_21_18 -> level 0, x 3221, z 3218",
   "covers": "shops (by vendor debugname), NPC drops with rates (via sub-tables), skill recipes, NPC services such as tanning and dyes, keyed chests, utensils an NPC hands out, minigame payouts, ground spawns, quest scripts that reference the item",
-  "date": "2026-09-20",
+  "date": "2026-09-21",
   "not_covered": "pickpocketing and stall loot (thieving.gen.json); items only obtainable from random events",
   "revision": "254",
   "revision_date": "September 7, 2004",

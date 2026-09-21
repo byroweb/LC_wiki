@@ -1,7 +1,7 @@
 {
  "meta": {
   "source": "LostCityRS Content, revision 254 (September 7, 2004)",
-  "generated": "2026-09-20",
+  "generated": "2026-09-21",
   "node_types": [
    "npc",
    "item",
@@ -38664,21 +38664,7 @@
    "r": "members"
   },
   {
-   "s": "quest:quest_itgronigen",
-   "t": "npc:man",
-   "type": "involves",
-   "l": "involves NPC",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_squire",
-   "t": "npc:man",
-   "type": "involves",
-   "l": "involves NPC",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_desertrescue",
+   "s": "quest:quest_waterfall",
    "t": "npc:man",
    "type": "involves",
    "l": "involves NPC",
@@ -38692,28 +38678,7 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_tree",
-   "t": "npc:man",
-   "type": "involves",
-   "l": "involves NPC",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_crest",
-   "t": "npc:man",
-   "type": "involves",
-   "l": "involves NPC",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_upass",
-   "t": "npc:man",
-   "type": "involves",
-   "l": "involves NPC",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_itexam",
+   "s": "quest:quest_squire",
    "t": "npc:man",
    "type": "involves",
    "l": "involves NPC",
@@ -38721,6 +38686,13 @@
   },
   {
    "s": "quest:quest_biohazard",
+   "t": "npc:man",
+   "type": "involves",
+   "l": "involves NPC",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_legends",
    "t": "npc:man",
    "type": "involves",
    "l": "involves NPC",
@@ -38748,7 +38720,21 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_legends",
+   "s": "quest:quest_itgronigen",
+   "t": "npc:man",
+   "type": "involves",
+   "l": "involves NPC",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_tree",
+   "t": "npc:man",
+   "type": "involves",
+   "l": "involves NPC",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_itexam",
    "t": "npc:man",
    "type": "involves",
    "l": "involves NPC",
@@ -38756,6 +38742,34 @@
   },
   {
    "s": "quest:quest_arena",
+   "t": "npc:man",
+   "type": "involves",
+   "l": "involves NPC",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_desertrescue",
+   "t": "npc:man",
+   "type": "involves",
+   "l": "involves NPC",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_grandtree",
+   "t": "npc:man",
+   "type": "involves",
+   "l": "involves NPC",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_upass",
+   "t": "npc:man",
+   "type": "involves",
+   "l": "involves NPC",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_crest",
    "t": "npc:man",
    "type": "involves",
    "l": "involves NPC",
@@ -38770,20 +38784,6 @@
   },
   {
    "s": "quest:quest_priestperil",
-   "t": "npc:man",
-   "type": "involves",
-   "l": "involves NPC",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_waterfall",
-   "t": "npc:man",
-   "type": "involves",
-   "l": "involves NPC",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_grandtree",
    "t": "npc:man",
    "type": "involves",
    "l": "involves NPC",
@@ -39343,14 +39343,14 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_arena",
+   "s": "quest:quest_biohazard",
    "t": "npc:woman",
    "type": "involves",
    "l": "involves NPC",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_biohazard",
+   "s": "quest:quest_arena",
    "t": "npc:woman",
    "type": "involves",
    "l": "involves NPC",
@@ -40561,7 +40561,7 @@
    "r": "members"
   },
   {
-   "s": "quest:quest_dragon",
+   "s": "quest:quest_itgronigen",
    "t": "npc:barbarian",
    "type": "involves",
    "l": "involves NPC",
@@ -40575,14 +40575,14 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_desertrescue",
+   "s": "quest:quest_dragon",
    "t": "npc:barbarian",
    "type": "involves",
    "l": "involves NPC",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_itgronigen",
+   "s": "quest:quest_desertrescue",
    "t": "npc:barbarian",
    "type": "involves",
    "l": "involves NPC",
@@ -40792,7 +40792,7 @@
    "r": "home of"
   },
   {
-   "s": "quest:quest_dragon",
+   "s": "quest:quest_priest",
    "t": "npc:wizard",
    "type": "involves",
    "l": "involves NPC",
@@ -40806,14 +40806,14 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_itwatchtower",
+   "s": "quest:quest_dragon",
    "t": "npc:wizard",
    "type": "involves",
    "l": "involves NPC",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_priest",
+   "s": "quest:quest_itwatchtower",
    "t": "npc:wizard",
    "type": "involves",
    "l": "involves NPC",
@@ -41142,7 +41142,7 @@
    "r": "home of"
   },
   {
-   "s": "quest:quest_crest",
+   "s": "quest:quest_ikov",
    "t": "npc:hero",
    "type": "involves",
    "l": "involves NPC",
@@ -41156,14 +41156,7 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_demon",
-   "t": "npc:hero",
-   "type": "involves",
-   "l": "involves NPC",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_ikov",
+   "s": "quest:quest_itwatchtower",
    "t": "npc:hero",
    "type": "involves",
    "l": "involves NPC",
@@ -41177,14 +41170,21 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_itwatchtower",
+   "s": "quest:quest_priestperil",
    "t": "npc:hero",
    "type": "involves",
    "l": "involves NPC",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_priestperil",
+   "s": "quest:quest_crest",
+   "t": "npc:hero",
+   "type": "involves",
+   "l": "involves NPC",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_demon",
    "t": "npc:hero",
    "type": "involves",
    "l": "involves NPC",
@@ -41604,13 +41604,6 @@
    "r": "members"
   },
   {
-   "s": "quest:quest_mcannon",
-   "t": "npc:chicken",
-   "type": "involves",
-   "l": "involves NPC",
-   "r": "in quest"
-  },
-  {
    "s": "quest:quest_haunted",
    "t": "npc:chicken",
    "type": "involves",
@@ -41619,6 +41612,13 @@
   },
   {
    "s": "quest:quest_druid",
+   "t": "npc:chicken",
+   "type": "involves",
+   "l": "involves NPC",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_mcannon",
    "t": "npc:chicken",
    "type": "involves",
    "l": "involves NPC",
@@ -42206,6 +42206,13 @@
    "r": "home of"
   },
   {
+   "s": "quest:quest_itwatchtower",
+   "t": "npc:rat",
+   "type": "involves",
+   "l": "involves NPC",
+   "r": "in quest"
+  },
+  {
    "s": "quest:quest_fluffs",
    "t": "npc:rat",
    "type": "involves",
@@ -42213,28 +42220,7 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_hetty",
-   "t": "npc:rat",
-   "type": "involves",
-   "l": "involves NPC",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_desertrescue",
-   "t": "npc:rat",
-   "type": "involves",
-   "l": "involves NPC",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_upass",
-   "t": "npc:rat",
-   "type": "involves",
-   "l": "involves NPC",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_itwatchtower",
+   "s": "quest:quest_druid",
    "t": "npc:rat",
    "type": "involves",
    "l": "involves NPC",
@@ -42255,7 +42241,21 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_druid",
+   "s": "quest:quest_upass",
+   "t": "npc:rat",
+   "type": "involves",
+   "l": "involves NPC",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_desertrescue",
+   "t": "npc:rat",
+   "type": "involves",
+   "l": "involves NPC",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_hetty",
    "t": "npc:rat",
    "type": "involves",
    "l": "involves NPC",
@@ -43116,14 +43116,7 @@
    "r": "home of"
   },
   {
-   "s": "quest:quest_crest",
-   "t": "npc:spider",
-   "type": "involves",
-   "l": "involves NPC",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_upass",
+   "s": "quest:quest_itwatchtower",
    "t": "npc:spider",
    "type": "involves",
    "l": "involves NPC",
@@ -43131,13 +43124,6 @@
   },
   {
    "s": "quest:quest_ball",
-   "t": "npc:spider",
-   "type": "involves",
-   "l": "involves NPC",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_itwatchtower",
    "t": "npc:spider",
    "type": "involves",
    "l": "involves NPC",
@@ -43152,6 +43138,20 @@
   },
   {
    "s": "quest:quest_itgronigen",
+   "t": "npc:spider",
+   "type": "involves",
+   "l": "involves NPC",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_upass",
+   "t": "npc:spider",
+   "type": "involves",
+   "l": "involves NPC",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_crest",
    "t": "npc:spider",
    "type": "involves",
    "l": "involves NPC",
@@ -44117,13 +44117,6 @@
    "r": "home of"
   },
   {
-   "s": "quest:quest_arthur",
-   "t": "npc:bat",
-   "type": "involves",
-   "l": "involves NPC",
-   "r": "in quest"
-  },
-  {
    "s": "quest:quest_legends",
    "t": "npc:bat",
    "type": "involves",
@@ -44132,6 +44125,13 @@
   },
   {
    "s": "quest:quest_itwatchtower",
+   "t": "npc:bat",
+   "type": "involves",
+   "l": "involves NPC",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_arthur",
    "t": "npc:bat",
    "type": "involves",
    "l": "involves NPC",
@@ -46140,7 +46140,7 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_desertrescue",
+   "s": "quest:quest_murder",
    "t": "npc:dog",
    "type": "involves",
    "l": "involves NPC",
@@ -46148,6 +46148,13 @@
   },
   {
    "s": "quest:quest_arena",
+   "t": "npc:dog",
+   "type": "involves",
+   "l": "involves NPC",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_desertrescue",
    "t": "npc:dog",
    "type": "involves",
    "l": "involves NPC",
@@ -46162,13 +46169,6 @@
   },
   {
    "s": "quest:quest_priestperil",
-   "t": "npc:dog",
-   "type": "involves",
-   "l": "involves NPC",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_murder",
    "t": "npc:dog",
    "type": "involves",
    "l": "involves NPC",
@@ -46413,13 +46413,6 @@
    "r": "home of"
   },
   {
-   "s": "quest:quest_gobdip",
-   "t": "npc:goblin",
-   "type": "involves",
-   "l": "involves NPC",
-   "r": "in quest"
-  },
-  {
    "s": "quest:quest_mcannon",
    "t": "npc:goblin",
    "type": "involves",
@@ -46427,7 +46420,7 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_grail",
+   "s": "quest:quest_itgronigen",
    "t": "npc:goblin",
    "type": "involves",
    "l": "involves NPC",
@@ -46441,7 +46434,14 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_itgronigen",
+   "s": "quest:quest_gobdip",
+   "t": "npc:goblin",
+   "type": "involves",
+   "l": "involves NPC",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_grail",
    "t": "npc:goblin",
    "type": "involves",
    "l": "involves NPC",
@@ -46910,13 +46910,6 @@
    "r": "home of"
   },
   {
-   "s": "quest:quest_priest",
-   "t": "npc:ghost",
-   "type": "involves",
-   "l": "involves NPC",
-   "r": "in quest"
-  },
-  {
    "s": "quest:quest_druidspirit",
    "t": "npc:ghost",
    "type": "involves",
@@ -46931,14 +46924,21 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_dragon",
+   "s": "quest:quest_itgronigen",
    "t": "npc:ghost",
    "type": "involves",
    "l": "involves NPC",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_itgronigen",
+   "s": "quest:quest_priest",
+   "t": "npc:ghost",
+   "type": "involves",
+   "l": "involves NPC",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_dragon",
    "t": "npc:ghost",
    "type": "involves",
    "l": "involves NPC",
@@ -47218,21 +47218,7 @@
    "r": "home of"
   },
   {
-   "s": "quest:quest_crest",
-   "t": "npc:scorpion",
-   "type": "involves",
-   "l": "involves NPC",
-   "r": "in quest"
-  },
-  {
    "s": "quest:quest_itwatchtower",
-   "t": "npc:scorpion",
-   "type": "involves",
-   "l": "involves NPC",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_scorpcatcher",
    "t": "npc:scorpion",
    "type": "involves",
    "l": "involves NPC",
@@ -47246,6 +47232,13 @@
    "r": "in quest"
   },
   {
+   "s": "quest:quest_itgronigen",
+   "t": "npc:scorpion",
+   "type": "involves",
+   "l": "involves NPC",
+   "r": "in quest"
+  },
+  {
    "s": "quest:quest_arena",
    "t": "npc:scorpion",
    "type": "involves",
@@ -47253,7 +47246,14 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_itgronigen",
+   "s": "quest:quest_scorpcatcher",
+   "t": "npc:scorpion",
+   "type": "involves",
+   "l": "involves NPC",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_crest",
    "t": "npc:scorpion",
    "type": "involves",
    "l": "involves NPC",
@@ -48345,7 +48345,7 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_upass",
+   "s": "quest:quest_legends",
    "t": "npc:giant",
    "type": "involves",
    "l": "involves NPC",
@@ -48359,14 +48359,7 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_arthur",
-   "t": "npc:giant",
-   "type": "involves",
-   "l": "involves NPC",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_legends",
+   "s": "quest:quest_upass",
    "t": "npc:giant",
    "type": "involves",
    "l": "involves NPC",
@@ -48374,6 +48367,13 @@
   },
   {
    "s": "quest:quest_arena",
+   "t": "npc:giant",
+   "type": "involves",
+   "l": "involves NPC",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_arthur",
    "t": "npc:giant",
    "type": "involves",
    "l": "involves NPC",
@@ -53238,14 +53238,14 @@
    "r": "home of"
   },
   {
-   "s": "quest:quest_ikov",
+   "s": "quest:quest_crest",
    "t": "npc:necromancer",
    "type": "involves",
    "l": "involves NPC",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_crest",
+   "s": "quest:quest_ikov",
    "t": "npc:necromancer",
    "type": "involves",
    "l": "involves NPC",
@@ -54008,7 +54008,7 @@
    "r": "home of"
   },
   {
-   "s": "quest:quest_itwatchtower",
+   "s": "quest:quest_imp",
    "t": "npc:imp",
    "type": "involves",
    "l": "involves NPC",
@@ -54022,7 +54022,7 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_imp",
+   "s": "quest:quest_itwatchtower",
    "t": "npc:imp",
    "type": "involves",
    "l": "involves NPC",
@@ -56388,14 +56388,14 @@
    "r": "home of"
   },
   {
-   "s": "quest:quest_grail",
+   "s": "quest:quest_arthur",
    "t": "npc:merlin",
    "type": "involves",
    "l": "involves NPC",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_arthur",
+   "s": "quest:quest_grail",
    "t": "npc:merlin",
    "type": "involves",
    "l": "involves NPC",
@@ -59188,14 +59188,14 @@
    "r": "home of"
   },
   {
-   "s": "quest:quest_squire",
+   "s": "quest:quest_upass",
    "t": "npc:squire",
    "type": "involves",
    "l": "involves NPC",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_upass",
+   "s": "quest:quest_squire",
    "t": "npc:squire",
    "type": "involves",
    "l": "involves NPC",
@@ -59706,13 +59706,6 @@
    "r": "home of"
   },
   {
-   "s": "quest:quest_tree",
-   "t": "npc:gnome",
-   "type": "involves",
-   "l": "involves NPC",
-   "r": "in quest"
-  },
-  {
    "s": "quest:quest_upass",
    "t": "npc:gnome",
    "type": "involves",
@@ -59721,6 +59714,13 @@
   },
   {
    "s": "quest:quest_waterfall",
+   "t": "npc:gnome",
+   "type": "involves",
+   "l": "involves NPC",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_tree",
    "t": "npc:gnome",
    "type": "involves",
    "l": "involves NPC",
@@ -61617,7 +61617,7 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_crest",
+   "s": "quest:quest_murder",
    "t": "npc:cook",
    "type": "involves",
    "l": "involves NPC",
@@ -61631,13 +61631,6 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_cook",
-   "t": "npc:cook",
-   "type": "involves",
-   "l": "involves NPC",
-   "r": "in quest"
-  },
-  {
    "s": "quest:quest_hero",
    "t": "npc:cook",
    "type": "involves",
@@ -61645,7 +61638,14 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_murder",
+   "s": "quest:quest_cook",
+   "t": "npc:cook",
+   "type": "involves",
+   "l": "involves NPC",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_crest",
    "t": "npc:cook",
    "type": "involves",
    "l": "involves NPC",
@@ -64151,7 +64151,7 @@
    "r": "home of"
   },
   {
-   "s": "quest:quest_cog",
+   "s": "quest:quest_murder",
    "t": "npc:og",
    "type": "involves",
    "l": "involves NPC",
@@ -64165,7 +64165,7 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_murder",
+   "s": "quest:quest_cog",
    "t": "npc:og",
    "type": "involves",
    "l": "involves NPC",
@@ -64179,21 +64179,7 @@
    "r": "home of"
   },
   {
-   "s": "quest:quest_grandtree",
-   "t": "npc:grew",
-   "type": "involves",
-   "l": "involves NPC",
-   "r": "in quest"
-  },
-  {
    "s": "quest:quest_druidspirit",
-   "t": "npc:grew",
-   "type": "involves",
-   "l": "involves NPC",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_upass",
    "t": "npc:grew",
    "type": "involves",
    "l": "involves NPC",
@@ -64208,6 +64194,20 @@
   },
   {
    "s": "quest:quest_itgronigen",
+   "t": "npc:grew",
+   "type": "involves",
+   "l": "involves NPC",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_upass",
+   "t": "npc:grew",
+   "type": "involves",
+   "l": "involves NPC",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_grandtree",
    "t": "npc:grew",
    "type": "involves",
    "l": "involves NPC",
@@ -75148,20 +75148,6 @@
    "r": "home of"
   },
   {
-   "s": "quest:quest_legends",
-   "t": "npc:grip",
-   "type": "involves",
-   "l": "involves NPC",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_hero",
-   "t": "npc:grip",
-   "type": "involves",
-   "l": "involves NPC",
-   "r": "in quest"
-  },
-  {
    "s": "quest:quest_upass",
    "t": "npc:grip",
    "type": "involves",
@@ -75169,7 +75155,21 @@
    "r": "in quest"
   },
   {
+   "s": "quest:quest_legends",
+   "t": "npc:grip",
+   "type": "involves",
+   "l": "involves NPC",
+   "r": "in quest"
+  },
+  {
    "s": "quest:quest_elena",
+   "t": "npc:grip",
+   "type": "involves",
+   "l": "involves NPC",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_hero",
    "t": "npc:grip",
    "type": "involves",
    "l": "involves NPC",
@@ -75260,14 +75260,14 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_mcannon",
+   "s": "quest:quest_ikov",
    "t": "npc:ikov_firewarrior",
    "type": "involves",
    "l": "involves NPC",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_ikov",
+   "s": "quest:quest_mcannon",
    "t": "npc:ikov_firewarrior",
    "type": "involves",
    "l": "involves NPC",
@@ -79768,7 +79768,35 @@
    "r": "ground items"
   },
   {
+   "s": "quest:quest_waterfall",
+   "t": "item:knife",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_zanaris",
+   "t": "item:knife",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
    "s": "quest:quest_chompybird",
+   "t": "item:knife",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_legends",
+   "t": "item:knife",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_murder",
    "t": "item:knife",
    "type": "involves",
    "l": "involves item",
@@ -79783,34 +79811,6 @@
   },
   {
    "s": "quest:quest_itexam",
-   "t": "item:knife",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_zanaris",
-   "t": "item:knife",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_legends",
-   "t": "item:knife",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_waterfall",
-   "t": "item:knife",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_murder",
    "t": "item:knife",
    "type": "involves",
    "l": "involves item",
@@ -79866,14 +79866,14 @@
    "r": "ground items"
   },
   {
-   "s": "quest:quest_elena",
+   "s": "quest:quest_haunted",
    "t": "item:spade",
    "type": "involves",
    "l": "involves item",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_haunted",
+   "s": "quest:quest_elena",
    "t": "item:spade",
    "type": "involves",
    "l": "involves item",
@@ -79929,35 +79929,14 @@
    "r": "ground items"
   },
   {
+   "s": "quest:quest_waterfall",
+   "t": "item:rope",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
    "s": "quest:quest_elena",
-   "t": "item:rope",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_zombiequeen",
-   "t": "item:rope",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_upass",
-   "t": "item:rope",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_itexam",
-   "t": "item:rope",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_biohazard",
    "t": "item:rope",
    "type": "involves",
    "l": "involves item",
@@ -79971,7 +79950,14 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_dragon",
+   "s": "quest:quest_zombiequeen",
+   "t": "item:rope",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_biohazard",
    "t": "item:rope",
    "type": "involves",
    "l": "involves item",
@@ -79992,7 +79978,21 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_waterfall",
+   "s": "quest:quest_dragon",
+   "t": "item:rope",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_itexam",
+   "t": "item:rope",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_upass",
    "t": "item:rope",
    "type": "involves",
    "l": "involves item",
@@ -80034,7 +80034,7 @@
    "r": "ground items"
   },
   {
-   "s": "quest:quest_dragon",
+   "s": "quest:quest_itgronigen",
    "t": "item:woodplank",
    "type": "involves",
    "l": "involves item",
@@ -80048,7 +80048,7 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_itgronigen",
+   "s": "quest:quest_dragon",
    "t": "item:woodplank",
    "type": "involves",
    "l": "involves item",
@@ -80069,14 +80069,14 @@
    "r": "ground items"
   },
   {
-   "s": "quest:quest_zombiequeen",
+   "s": "quest:quest_priest",
    "t": "item:skull",
    "type": "involves",
    "l": "involves item",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_arena",
+   "s": "quest:quest_zombiequeen",
    "t": "item:skull",
    "type": "involves",
    "l": "involves item",
@@ -80090,7 +80090,7 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_priest",
+   "s": "quest:quest_arena",
    "t": "item:skull",
    "type": "involves",
    "l": "involves item",
@@ -80125,21 +80125,14 @@
    "r": "ground items"
   },
   {
-   "s": "quest:quest_chompybird",
+   "s": "quest:quest_druidspirit",
    "t": "item:rock",
    "type": "involves",
    "l": "involves item",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_elemental_workshop",
-   "t": "item:rock",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_desertrescue",
+   "s": "quest:quest_waterfall",
    "t": "item:rock",
    "type": "involves",
    "l": "involves item",
@@ -80160,41 +80153,6 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_druidspirit",
-   "t": "item:rock",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_zombiequeen",
-   "t": "item:rock",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_upass",
-   "t": "item:rock",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_troll",
-   "t": "item:rock",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_itexam",
-   "t": "item:rock",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
    "s": "quest:quest_itwatchtower",
    "t": "item:rock",
    "type": "involves",
@@ -80202,7 +80160,7 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_dragon",
+   "s": "quest:quest_chompybird",
    "t": "item:rock",
    "type": "involves",
    "l": "involves item",
@@ -80216,7 +80174,42 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_waterfall",
+   "s": "quest:quest_zombiequeen",
+   "t": "item:rock",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_elemental_workshop",
+   "t": "item:rock",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_dragon",
+   "t": "item:rock",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_itexam",
+   "t": "item:rock",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_upass",
+   "t": "item:rock",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_desertrescue",
    "t": "item:rock",
    "type": "involves",
    "l": "involves item",
@@ -80224,6 +80217,13 @@
   },
   {
    "s": "quest:quest_grandtree",
+   "t": "item:rock",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_troll",
    "t": "item:rock",
    "type": "involves",
    "l": "involves item",
@@ -80244,13 +80244,6 @@
    "r": "ground items"
   },
   {
-   "s": "quest:quest_legends",
-   "t": "item:papyrus",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
    "s": "quest:quest_druidspirit",
    "t": "item:papyrus",
    "type": "involves",
@@ -80265,7 +80258,14 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_itexam",
+   "s": "quest:quest_legends",
+   "t": "item:papyrus",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_zombiequeen",
    "t": "item:charcoal",
    "type": "involves",
    "l": "involves item",
@@ -80279,7 +80279,7 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_zombiequeen",
+   "s": "quest:quest_itexam",
    "t": "item:charcoal",
    "type": "involves",
    "l": "involves item",
@@ -80447,20 +80447,6 @@
    "r": "ground items"
   },
   {
-   "s": "quest:quest_cog",
-   "t": "item:coins",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_desertrescue",
-   "t": "item:coins",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
    "s": "quest:quest_druidspirit",
    "t": "item:coins",
    "type": "involves",
@@ -80468,21 +80454,21 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_zombiequeen",
+   "s": "quest:quest_haunted",
    "t": "item:coins",
    "type": "involves",
    "l": "involves item",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_upass",
+   "s": "quest:quest_doric",
    "t": "item:coins",
    "type": "involves",
    "l": "involves item",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_grail",
+   "s": "quest:quest_mcannon",
    "t": "item:coins",
    "type": "involves",
    "l": "involves item",
@@ -80496,7 +80482,42 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_hunt",
+   "s": "quest:quest_dragon",
+   "t": "item:coins",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_grail",
+   "t": "item:coins",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_hazeelcult",
+   "t": "item:coins",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_blackarmgang",
+   "t": "item:coins",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_zanaris",
+   "t": "item:coins",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_zombiequeen",
    "t": "item:coins",
    "type": "involves",
    "l": "involves item",
@@ -80510,21 +80531,35 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_grandtree",
+   "s": "quest:quest_cog",
    "t": "item:coins",
    "type": "involves",
    "l": "involves item",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_fluffs",
+   "s": "quest:quest_hunt",
    "t": "item:coins",
    "type": "involves",
    "l": "involves item",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_dragon",
+   "s": "quest:quest_upass",
+   "t": "item:coins",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_blackknight",
+   "t": "item:coins",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_itwatchtower",
    "t": "item:coins",
    "type": "involves",
    "l": "involves item",
@@ -80538,6 +80573,13 @@
    "r": "in quest"
   },
   {
+   "s": "quest:quest_itexam",
+   "t": "item:coins",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
    "s": "quest:quest_arena",
    "t": "item:coins",
    "type": "involves",
@@ -80545,7 +80587,7 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_hazeelcult",
+   "s": "quest:quest_fluffs",
    "t": "item:coins",
    "type": "involves",
    "l": "involves item",
@@ -80566,7 +80608,7 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_sheep",
+   "s": "quest:quest_murder",
    "t": "item:coins",
    "type": "involves",
    "l": "involves item",
@@ -80580,63 +80622,21 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_haunted",
+   "s": "quest:quest_desertrescue",
    "t": "item:coins",
    "type": "involves",
    "l": "involves item",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_blackarmgang",
+   "s": "quest:quest_grandtree",
    "t": "item:coins",
    "type": "involves",
    "l": "involves item",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_mcannon",
-   "t": "item:coins",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_doric",
-   "t": "item:coins",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_murder",
-   "t": "item:coins",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_blackknight",
-   "t": "item:coins",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_itexam",
-   "t": "item:coins",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_itwatchtower",
-   "t": "item:coins",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_zanaris",
+   "s": "quest:quest_sheep",
    "t": "item:coins",
    "type": "involves",
    "l": "involves item",
@@ -80804,7 +80804,7 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_vampire",
+   "s": "quest:quest_fishingcompo",
    "t": "item:garlic",
    "type": "involves",
    "l": "involves item",
@@ -80818,21 +80818,21 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_fishingcompo",
+   "s": "quest:quest_vampire",
    "t": "item:garlic",
    "type": "involves",
    "l": "involves item",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_cog",
+   "s": "quest:quest_hero",
    "t": "item:ice_gloves",
    "type": "involves",
    "l": "involves item",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_hero",
+   "s": "quest:quest_cog",
    "t": "item:ice_gloves",
    "type": "involves",
    "l": "involves item",
@@ -80986,14 +80986,14 @@
    "r": "ground items"
   },
   {
-   "s": "quest:quest_itexam",
+   "s": "quest:quest_legends",
    "t": "item:jug_empty",
    "type": "involves",
    "l": "involves item",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_legends",
+   "s": "quest:quest_itexam",
    "t": "item:jug_empty",
    "type": "involves",
    "l": "involves item",
@@ -81126,6 +81126,13 @@
    "r": "ground items"
   },
   {
+   "s": "quest:quest_elena",
+   "t": "item:bucket_empty",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
    "s": "quest:quest_fluffs",
    "t": "item:bucket_empty",
    "type": "involves",
@@ -81133,14 +81140,21 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_cog",
+   "s": "quest:quest_demon",
    "t": "item:bucket_empty",
    "type": "involves",
    "l": "involves item",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_elena",
+   "s": "quest:quest_legends",
+   "t": "item:bucket_empty",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_cog",
    "t": "item:bucket_empty",
    "type": "involves",
    "l": "involves item",
@@ -81161,7 +81175,7 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_demon",
+   "s": "quest:quest_priestperil",
    "t": "item:bucket_empty",
    "type": "involves",
    "l": "involves item",
@@ -81169,20 +81183,6 @@
   },
   {
    "s": "quest:quest_arthur",
-   "t": "item:bucket_empty",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_legends",
-   "t": "item:bucket_empty",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_priestperil",
    "t": "item:bucket_empty",
    "type": "involves",
    "l": "involves item",
@@ -81203,21 +81203,7 @@
    "r": "ground items"
   },
   {
-   "s": "quest:quest_cog",
-   "t": "item:bucket_water",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
    "s": "quest:quest_elena",
-   "t": "item:bucket_water",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_demon",
    "t": "item:bucket_water",
    "type": "involves",
    "l": "involves item",
@@ -81231,7 +81217,21 @@
    "r": "in quest"
   },
   {
+   "s": "quest:quest_cog",
+   "t": "item:bucket_water",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
    "s": "quest:quest_priestperil",
+   "t": "item:bucket_water",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_demon",
    "t": "item:bucket_water",
    "type": "involves",
    "l": "involves item",
@@ -81273,14 +81273,14 @@
    "r": "ground items"
   },
   {
-   "s": "quest:quest_itexam",
+   "s": "quest:quest_legends",
    "t": "item:bowl_empty",
    "type": "involves",
    "l": "involves item",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_legends",
+   "s": "quest:quest_itexam",
    "t": "item:bowl_empty",
    "type": "involves",
    "l": "involves item",
@@ -81385,14 +81385,14 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_arthur",
+   "s": "quest:quest_zombiequeen",
    "t": "item:lit_black_candle",
    "type": "involves",
    "l": "involves item",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_zombiequeen",
+   "s": "quest:quest_arthur",
    "t": "item:lit_black_candle",
    "type": "involves",
    "l": "involves item",
@@ -81427,14 +81427,14 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_grail",
+   "s": "quest:quest_arthur",
    "t": "item:excalibur",
    "type": "involves",
    "l": "involves item",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_arthur",
+   "s": "quest:quest_grail",
    "t": "item:excalibur",
    "type": "involves",
    "l": "involves item",
@@ -81448,20 +81448,6 @@
    "r": "ground items"
   },
   {
-   "s": "quest:quest_death",
-   "t": "item:ball",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_fluffs",
-   "t": "item:ball",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
    "s": "quest:quest_ball",
    "t": "item:ball",
    "type": "involves",
@@ -81469,7 +81455,21 @@
    "r": "in quest"
   },
   {
+   "s": "quest:quest_death",
+   "t": "item:ball",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
    "s": "quest:quest_mcannon",
+   "t": "item:ball",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_fluffs",
    "t": "item:ball",
    "type": "involves",
    "l": "involves item",
@@ -81833,14 +81833,14 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_chompybird",
+   "s": "quest:quest_fluffs",
    "t": "item:raw_chompy",
    "type": "involves",
    "l": "involves item",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_fluffs",
+   "s": "quest:quest_chompybird",
    "t": "item:raw_chompy",
    "type": "involves",
    "l": "involves item",
@@ -82624,14 +82624,14 @@
    "r": "ground items"
   },
   {
-   "s": "quest:quest_chompybird",
+   "s": "quest:quest_fluffs",
    "t": "item:doogleleaves",
    "type": "involves",
    "l": "involves item",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_fluffs",
+   "s": "quest:quest_chompybird",
    "t": "item:doogleleaves",
    "type": "involves",
    "l": "involves item",
@@ -82946,28 +82946,7 @@
    "r": "ground items"
   },
   {
-   "s": "quest:quest_itgronigen",
-   "t": "item:poison",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
    "s": "quest:quest_haunted",
-   "t": "item:poison",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_crest",
-   "t": "item:poison",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_upass",
    "t": "item:poison",
    "type": "involves",
    "l": "involves item",
@@ -82981,14 +82960,35 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_hazeelcult",
+   "s": "quest:quest_murder",
    "t": "item:poison",
    "type": "involves",
    "l": "involves item",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_murder",
+   "s": "quest:quest_itgronigen",
+   "t": "item:poison",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_upass",
+   "t": "item:poison",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_crest",
+   "t": "item:poison",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_hazeelcult",
    "t": "item:poison",
    "type": "involves",
    "l": "involves item",
@@ -83625,14 +83625,14 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_seaslug",
+   "s": "quest:quest_itgronigen",
    "t": "item:lens",
    "type": "involves",
    "l": "involves item",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_itgronigen",
+   "s": "quest:quest_seaslug",
    "t": "item:lens",
    "type": "involves",
    "l": "involves item",
@@ -85214,13 +85214,6 @@
    "r": "ground items"
   },
   {
-   "s": "quest:quest_grail",
-   "t": "item:iron_dagger",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
    "s": "quest:quest_druidspirit",
    "t": "item:iron_dagger",
    "type": "involves",
@@ -85229,6 +85222,13 @@
   },
   {
    "s": "quest:quest_itexam",
+   "t": "item:iron_dagger",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_grail",
    "t": "item:iron_dagger",
    "type": "involves",
    "l": "involves item",
@@ -85557,14 +85557,14 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_grail",
+   "s": "quest:quest_upass",
    "t": "item:iron_arrow",
    "type": "involves",
    "l": "involves item",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_upass",
+   "s": "quest:quest_grail",
    "t": "item:iron_arrow",
    "type": "involves",
    "l": "involves item",
@@ -85578,14 +85578,14 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_grail",
+   "s": "quest:quest_upass",
    "t": "item:steel_arrow",
    "type": "involves",
    "l": "involves item",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_upass",
+   "s": "quest:quest_grail",
    "t": "item:steel_arrow",
    "type": "involves",
    "l": "involves item",
@@ -85851,14 +85851,14 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_itexam",
+   "s": "quest:quest_legends",
    "t": "item:iron_knife",
    "type": "involves",
    "l": "involves item",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_legends",
+   "s": "quest:quest_itexam",
    "t": "item:iron_knife",
    "type": "involves",
    "l": "involves item",
@@ -86005,14 +86005,14 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_grail",
+   "s": "quest:quest_arena",
    "t": "item:beer",
    "type": "involves",
    "l": "involves item",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_arena",
+   "s": "quest:quest_grail",
    "t": "item:beer",
    "type": "involves",
    "l": "involves item",
@@ -86103,14 +86103,14 @@
    "r": "ground items"
   },
   {
-   "s": "quest:quest_itexam",
+   "s": "quest:quest_hunt",
    "t": "item:banana",
    "type": "involves",
    "l": "involves item",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_hunt",
+   "s": "quest:quest_itexam",
    "t": "item:banana",
    "type": "involves",
    "l": "involves item",
@@ -86138,6 +86138,13 @@
    "r": "ground items"
   },
   {
+   "s": "quest:quest_upass",
+   "t": "item:cabbage",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
    "s": "quest:quest_chompybird",
    "t": "item:cabbage",
    "type": "involves",
@@ -86146,13 +86153,6 @@
   },
   {
    "s": "quest:quest_dragon",
-   "t": "item:cabbage",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_upass",
    "t": "item:cabbage",
    "type": "involves",
    "l": "involves item",
@@ -86222,13 +86222,6 @@
    "r": "ground items"
   },
   {
-   "s": "quest:quest_itexam",
-   "t": "item:rottenapples",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
    "s": "quest:quest_druidspirit",
    "t": "item:rottenapples",
    "type": "involves",
@@ -86237,6 +86230,13 @@
   },
   {
    "s": "quest:quest_biohazard",
+   "t": "item:rottenapples",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_itexam",
    "t": "item:rottenapples",
    "type": "involves",
    "l": "involves item",
@@ -86299,7 +86299,7 @@
    "r": "ground items"
   },
   {
-   "s": "quest:quest_itexam",
+   "s": "quest:quest_murder",
    "t": "item:pot_empty",
    "type": "involves",
    "l": "involves item",
@@ -86313,7 +86313,7 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_murder",
+   "s": "quest:quest_itexam",
    "t": "item:pot_empty",
    "type": "involves",
    "l": "involves item",
@@ -86376,14 +86376,14 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_dragon",
+   "s": "quest:quest_druid",
    "t": "item:raw_rat_meat",
    "type": "involves",
    "l": "involves item",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_druid",
+   "s": "quest:quest_dragon",
    "t": "item:raw_rat_meat",
    "type": "involves",
    "l": "involves item",
@@ -86544,28 +86544,7 @@
    "r": "ground items"
   },
   {
-   "s": "quest:quest_upass",
-   "t": "item:bread",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
    "s": "quest:quest_itwatchtower",
-   "t": "item:bread",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_death",
-   "t": "item:bread",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_arthur",
    "t": "item:bread",
    "type": "involves",
    "l": "involves item",
@@ -86579,7 +86558,28 @@
    "r": "in quest"
   },
   {
+   "s": "quest:quest_death",
+   "t": "item:bread",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_upass",
+   "t": "item:bread",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
    "s": "quest:quest_grandtree",
+   "t": "item:bread",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_arthur",
    "t": "item:bread",
    "type": "involves",
    "l": "involves item",
@@ -86684,14 +86684,14 @@
    "r": "ground items"
   },
   {
-   "s": "quest:quest_itexam",
+   "s": "quest:quest_druidspirit",
    "t": "item:piedish",
    "type": "involves",
    "l": "involves item",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_druidspirit",
+   "s": "quest:quest_itexam",
    "t": "item:piedish",
    "type": "involves",
    "l": "involves item",
@@ -86747,14 +86747,14 @@
    "r": "ground items"
   },
   {
-   "s": "quest:quest_legends",
+   "s": "quest:quest_ball",
    "t": "item:cheese",
    "type": "involves",
    "l": "involves item",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_ball",
+   "s": "quest:quest_legends",
    "t": "item:cheese",
    "type": "involves",
    "l": "involves item",
@@ -86775,14 +86775,14 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_biohazard",
+   "s": "quest:quest_upass",
    "t": "item:stew",
    "type": "involves",
    "l": "involves item",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_upass",
+   "s": "quest:quest_biohazard",
    "t": "item:stew",
    "type": "involves",
    "l": "involves item",
@@ -86894,14 +86894,14 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_itexam",
+   "s": "quest:quest_dragon",
    "t": "item:orange",
    "type": "involves",
    "l": "involves item",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_dragon",
+   "s": "quest:quest_itexam",
    "t": "item:orange",
    "type": "involves",
    "l": "involves item",
@@ -86915,14 +86915,14 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_legends",
+   "s": "quest:quest_druidspirit",
    "t": "item:pineapple",
    "type": "involves",
    "l": "involves item",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_druidspirit",
+   "s": "quest:quest_legends",
    "t": "item:pineapple",
    "type": "involves",
    "l": "involves item",
@@ -87041,6 +87041,13 @@
    "r": "in quest"
   },
   {
+   "s": "quest:quest_murder",
+   "t": "item:needle",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
    "s": "quest:quest_itexam",
    "t": "item:needle",
    "type": "involves",
@@ -87055,13 +87062,6 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_murder",
-   "t": "item:needle",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
    "s": "item:thread",
    "t": "area:lumber_yard",
    "type": "found_in",
@@ -87069,14 +87069,14 @@
    "r": "ground items"
   },
   {
-   "s": "quest:quest_elemental_workshop",
+   "s": "quest:quest_murder",
    "t": "item:thread",
    "type": "involves",
    "l": "involves item",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_murder",
+   "s": "quest:quest_elemental_workshop",
    "t": "item:thread",
    "type": "involves",
    "l": "involves item",
@@ -87125,49 +87125,14 @@
    "r": "ground items"
   },
   {
-   "s": "quest:quest_chompybird",
-   "t": "item:chisel",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_desertrescue",
-   "t": "item:chisel",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_crest",
-   "t": "item:chisel",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_zombiequeen",
-   "t": "item:chisel",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_itexam",
-   "t": "item:chisel",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_mcannon",
-   "t": "item:chisel",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
    "s": "quest:quest_sheepherder",
+   "t": "item:chisel",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_chompybird",
    "t": "item:chisel",
    "type": "involves",
    "l": "involves item",
@@ -87181,6 +87146,27 @@
    "r": "in quest"
   },
   {
+   "s": "quest:quest_zombiequeen",
+   "t": "item:chisel",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_mcannon",
+   "t": "item:chisel",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_itexam",
+   "t": "item:chisel",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
    "s": "quest:quest_arena",
    "t": "item:chisel",
    "type": "involves",
@@ -87188,7 +87174,21 @@
    "r": "in quest"
   },
   {
+   "s": "quest:quest_desertrescue",
+   "t": "item:chisel",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
    "s": "quest:quest_grandtree",
+   "t": "item:chisel",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_crest",
    "t": "item:chisel",
    "type": "involves",
    "l": "involves item",
@@ -87209,14 +87209,14 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_legends",
+   "s": "quest:quest_waterfall",
    "t": "item:bow_string",
    "type": "involves",
    "l": "involves item",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_waterfall",
+   "s": "quest:quest_legends",
    "t": "item:bow_string",
    "type": "involves",
    "l": "involves item",
@@ -87461,14 +87461,14 @@
    "r": "ground items"
   },
   {
-   "s": "quest:quest_itexam",
+   "s": "quest:quest_ball",
    "t": "item:leather_gloves",
    "type": "involves",
    "l": "involves item",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_ball",
+   "s": "quest:quest_itexam",
    "t": "item:leather_gloves",
    "type": "involves",
    "l": "involves item",
@@ -87573,20 +87573,6 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_upass",
-   "t": "item:tinderbox",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_itexam",
-   "t": "item:tinderbox",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
    "s": "quest:quest_itwatchtower",
    "t": "item:tinderbox",
    "type": "involves",
@@ -87601,7 +87587,21 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_dragon",
+   "s": "quest:quest_upass",
+   "t": "item:tinderbox",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_itexam",
+   "t": "item:tinderbox",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_upass",
    "t": "item:ashes",
    "type": "involves",
    "l": "involves item",
@@ -87615,7 +87615,7 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_upass",
+   "s": "quest:quest_dragon",
    "t": "item:ashes",
    "type": "involves",
    "l": "involves item",
@@ -87643,14 +87643,14 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_legends",
+   "s": "quest:quest_seaslug",
    "t": "item:torch_unlit",
    "type": "involves",
    "l": "involves item",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_seaslug",
+   "s": "quest:quest_legends",
    "t": "item:torch_unlit",
    "type": "involves",
    "l": "involves item",
@@ -87713,28 +87713,7 @@
    "r": "ground items"
   },
   {
-   "s": "quest:quest_chompybird",
-   "t": "item:logs",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_tree",
-   "t": "item:logs",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_legends",
-   "t": "item:logs",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_troll",
+   "s": "quest:quest_waterfall",
    "t": "item:logs",
    "type": "involves",
    "l": "involves item",
@@ -87748,6 +87727,20 @@
    "r": "in quest"
   },
   {
+   "s": "quest:quest_chompybird",
+   "t": "item:logs",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_legends",
+   "t": "item:logs",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
    "s": "quest:quest_hunt",
    "t": "item:logs",
    "type": "involves",
@@ -87755,7 +87748,14 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_waterfall",
+   "s": "quest:quest_tree",
+   "t": "item:logs",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_troll",
    "t": "item:logs",
    "type": "involves",
    "l": "involves item",
@@ -87790,35 +87790,7 @@
    "r": "ground items"
   },
   {
-   "s": "quest:quest_cog",
-   "t": "item:net",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_desertrescue",
-   "t": "item:net",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_tree",
-   "t": "item:net",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
    "s": "quest:quest_druidspirit",
-   "t": "item:net",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_upass",
    "t": "item:net",
    "type": "involves",
    "l": "involves item",
@@ -87832,7 +87804,7 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_fishingcompo",
+   "s": "quest:quest_mcannon",
    "t": "item:net",
    "type": "involves",
    "l": "involves item",
@@ -87846,91 +87818,7 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_grandtree",
-   "t": "item:net",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_fluffs",
-   "t": "item:net",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_dragon",
-   "t": "item:net",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_legends",
-   "t": "item:net",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_arena",
-   "t": "item:net",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_hazeelcult",
-   "t": "item:net",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_sheepherder",
-   "t": "item:net",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_seaslug",
-   "t": "item:net",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_troll",
-   "t": "item:net",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_ikov",
-   "t": "item:net",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_biohazard",
-   "t": "item:net",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_mcannon",
-   "t": "item:net",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_priestperil",
+   "s": "quest:quest_fishingcompo",
    "t": "item:net",
    "type": "involves",
    "l": "involves item",
@@ -87944,6 +87832,27 @@
    "r": "in quest"
   },
   {
+   "s": "quest:quest_dragon",
+   "t": "item:net",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_hazeelcult",
+   "t": "item:net",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_arthur",
+   "t": "item:net",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
    "s": "quest:quest_elena",
    "t": "item:net",
    "type": "involves",
@@ -87951,7 +87860,14 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_itexam",
+   "s": "quest:quest_cog",
+   "t": "item:net",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_upass",
    "t": "item:net",
    "type": "involves",
    "l": "involves item",
@@ -87972,7 +87888,91 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_arthur",
+   "s": "quest:quest_biohazard",
+   "t": "item:net",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_legends",
+   "t": "item:net",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_tree",
+   "t": "item:net",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_itexam",
+   "t": "item:net",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_arena",
+   "t": "item:net",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_troll",
+   "t": "item:net",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_priestperil",
+   "t": "item:net",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_ikov",
+   "t": "item:net",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_fluffs",
+   "t": "item:net",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_sheepherder",
+   "t": "item:net",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_seaslug",
+   "t": "item:net",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_desertrescue",
+   "t": "item:net",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_grandtree",
    "t": "item:net",
    "type": "involves",
    "l": "involves item",
@@ -87993,14 +87993,14 @@
    "r": "ground items"
   },
   {
-   "s": "quest:quest_hero",
+   "s": "quest:quest_fishingcompo",
    "t": "item:fishing_rod",
    "type": "involves",
    "l": "involves item",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_fishingcompo",
+   "s": "quest:quest_hero",
    "t": "item:fishing_rod",
    "type": "involves",
    "l": "involves item",
@@ -88042,20 +88042,6 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_chompybird",
-   "t": "item:feather",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_desertrescue",
-   "t": "item:feather",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
    "s": "quest:quest_haunted",
    "t": "item:feather",
    "type": "involves",
@@ -88063,7 +88049,21 @@
    "r": "in quest"
   },
   {
+   "s": "quest:quest_chompybird",
+   "t": "item:feather",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
    "s": "quest:quest_hero",
+   "t": "item:feather",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_desertrescue",
    "t": "item:feather",
    "type": "involves",
    "l": "involves item",
@@ -88154,14 +88154,14 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_crest",
+   "s": "quest:quest_upass",
    "t": "item:salmon",
    "type": "involves",
    "l": "involves item",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_upass",
+   "s": "quest:quest_crest",
    "t": "item:salmon",
    "type": "involves",
    "l": "involves item",
@@ -88252,14 +88252,14 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_crest",
+   "s": "quest:quest_itgronigen",
    "t": "item:tuna",
    "type": "involves",
    "l": "involves item",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_itgronigen",
+   "s": "quest:quest_crest",
    "t": "item:tuna",
    "type": "involves",
    "l": "involves item",
@@ -88273,14 +88273,14 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_totem",
+   "s": "quest:quest_crest",
    "t": "item:swordfish",
    "type": "involves",
    "l": "involves item",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_crest",
+   "s": "quest:quest_totem",
    "t": "item:swordfish",
    "type": "involves",
    "l": "involves item",
@@ -88462,14 +88462,14 @@
    "r": "ground items"
   },
   {
-   "s": "quest:quest_grail",
+   "s": "quest:quest_ikov",
    "t": "item:limpwurt_root",
    "type": "involves",
    "l": "involves item",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_ikov",
+   "s": "quest:quest_grail",
    "t": "item:limpwurt_root",
    "type": "involves",
    "l": "involves item",
@@ -88567,14 +88567,14 @@
    "r": "ground items"
   },
   {
-   "s": "quest:quest_itexam",
+   "s": "quest:quest_legends",
    "t": "item:vial_empty",
    "type": "involves",
    "l": "involves item",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_legends",
+   "s": "quest:quest_itexam",
    "t": "item:vial_empty",
    "type": "involves",
    "l": "involves item",
@@ -88623,14 +88623,14 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_junglepotion",
+   "s": "quest:quest_druid",
    "t": "item:marentill",
    "type": "involves",
    "l": "involves item",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_druid",
+   "s": "quest:quest_junglepotion",
    "t": "item:marentill",
    "type": "involves",
    "l": "involves item",
@@ -88784,7 +88784,14 @@
    "r": "ground items"
   },
   {
-   "s": "quest:quest_grail",
+   "s": "quest:quest_druidspirit",
+   "t": "item:firerune",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_legends",
    "t": "item:firerune",
    "type": "involves",
    "l": "involves item",
@@ -88798,7 +88805,7 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_druidspirit",
+   "s": "quest:quest_death",
    "t": "item:firerune",
    "type": "involves",
    "l": "involves item",
@@ -88812,14 +88819,7 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_death",
-   "t": "item:firerune",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_legends",
+   "s": "quest:quest_grail",
    "t": "item:firerune",
    "type": "involves",
    "l": "involves item",
@@ -88847,14 +88847,7 @@
    "r": "ground items"
   },
   {
-   "s": "quest:quest_elemental_workshop",
-   "t": "item:waterrune",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_grail",
+   "s": "quest:quest_waterfall",
    "t": "item:waterrune",
    "type": "involves",
    "l": "involves item",
@@ -88868,7 +88861,7 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_waterfall",
+   "s": "quest:quest_elemental_workshop",
    "t": "item:waterrune",
    "type": "involves",
    "l": "involves item",
@@ -88876,6 +88869,13 @@
   },
   {
    "s": "quest:quest_itgronigen",
+   "t": "item:waterrune",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_grail",
    "t": "item:waterrune",
    "type": "involves",
    "l": "involves item",
@@ -88903,13 +88903,6 @@
    "r": "ground items"
   },
   {
-   "s": "quest:quest_elemental_workshop",
-   "t": "item:airrune",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
    "s": "quest:quest_druidspirit",
    "t": "item:airrune",
    "type": "involves",
@@ -88917,7 +88910,7 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_death",
+   "s": "quest:quest_waterfall",
    "t": "item:airrune",
    "type": "involves",
    "l": "involves item",
@@ -88931,7 +88924,14 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_waterfall",
+   "s": "quest:quest_elemental_workshop",
+   "t": "item:airrune",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_death",
    "t": "item:airrune",
    "type": "involves",
    "l": "involves item",
@@ -89015,14 +89015,14 @@
    "r": "ground items"
   },
   {
-   "s": "quest:quest_grail",
+   "s": "quest:quest_legends",
    "t": "item:mindrune",
    "type": "involves",
    "l": "involves item",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_legends",
+   "s": "quest:quest_grail",
    "t": "item:mindrune",
    "type": "involves",
    "l": "involves item",
@@ -89085,7 +89085,7 @@
    "r": "ground items"
   },
   {
-   "s": "quest:quest_grail",
+   "s": "quest:quest_upass",
    "t": "item:deathrune",
    "type": "involves",
    "l": "involves item",
@@ -89099,14 +89099,14 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_upass",
+   "s": "quest:quest_elemental_workshop",
    "t": "item:deathrune",
    "type": "involves",
    "l": "involves item",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_elemental_workshop",
+   "s": "quest:quest_grail",
    "t": "item:deathrune",
    "type": "involves",
    "l": "involves item",
@@ -89127,14 +89127,14 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_grail",
+   "s": "quest:quest_elemental_workshop",
    "t": "item:naturerune",
    "type": "involves",
    "l": "involves item",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_elemental_workshop",
+   "s": "quest:quest_grail",
    "t": "item:naturerune",
    "type": "involves",
    "l": "involves item",
@@ -89169,13 +89169,6 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_grail",
-   "t": "item:chaosrune",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
    "s": "quest:quest_druidspirit",
    "t": "item:chaosrune",
    "type": "involves",
@@ -89185,6 +89178,20 @@
   {
    "s": "quest:quest_elemental_workshop",
    "t": "item:chaosrune",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_grail",
+   "t": "item:chaosrune",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_legends",
+   "t": "item:lawrune",
    "type": "involves",
    "l": "involves item",
    "r": "in quest"
@@ -89204,21 +89211,14 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_grail",
-   "t": "item:lawrune",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_legends",
-   "t": "item:lawrune",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
    "s": "quest:quest_itgronigen",
+   "t": "item:lawrune",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_grail",
    "t": "item:lawrune",
    "type": "involves",
    "l": "involves item",
@@ -89232,14 +89232,14 @@
    "r": "ground items"
   },
   {
-   "s": "quest:quest_grail",
+   "s": "quest:quest_druidspirit",
    "t": "item:cosmicrune",
    "type": "involves",
    "l": "involves item",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_druidspirit",
+   "s": "quest:quest_grail",
    "t": "item:cosmicrune",
    "type": "involves",
    "l": "involves item",
@@ -89281,6 +89281,13 @@
    "r": "in quest"
   },
   {
+   "s": "quest:quest_ball",
+   "t": "item:clay",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
    "s": "quest:quest_itexam",
    "t": "item:clay",
    "type": "involves",
@@ -89289,13 +89296,6 @@
   },
   {
    "s": "quest:quest_doric",
-   "t": "item:clay",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_ball",
    "t": "item:clay",
    "type": "involves",
    "l": "involves item",
@@ -89442,14 +89442,14 @@
    "r": "ground items"
   },
   {
-   "s": "quest:quest_doric",
+   "s": "quest:quest_legends",
    "t": "item:steel_pickaxe",
    "type": "involves",
    "l": "involves item",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_legends",
+   "s": "quest:quest_doric",
    "t": "item:steel_pickaxe",
    "type": "involves",
    "l": "involves item",
@@ -89708,70 +89708,7 @@
    "r": "ground items"
   },
   {
-   "s": "quest:quest_chompybird",
-   "t": "item:bones",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_tree",
-   "t": "item:bones",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
    "s": "quest:quest_druidspirit",
-   "t": "item:bones",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_zombiequeen",
-   "t": "item:bones",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_upass",
-   "t": "item:bones",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_sheepherder",
-   "t": "item:bones",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_itexam",
-   "t": "item:bones",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_demon",
-   "t": "item:bones",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_itwatchtower",
-   "t": "item:bones",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_grail",
    "t": "item:bones",
    "type": "involves",
    "l": "involves item",
@@ -89792,6 +89729,69 @@
    "r": "in quest"
   },
   {
+   "s": "quest:quest_itwatchtower",
+   "t": "item:bones",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_sheepherder",
+   "t": "item:bones",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_chompybird",
+   "t": "item:bones",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_zombiequeen",
+   "t": "item:bones",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_tree",
+   "t": "item:bones",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_itexam",
+   "t": "item:bones",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_upass",
+   "t": "item:bones",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_grail",
+   "t": "item:bones",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_demon",
+   "t": "item:bones",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
    "s": "item:bones_burnt",
    "t": "area:red_dragon_isle",
    "type": "found_in",
@@ -89806,14 +89806,14 @@
    "r": "ground items"
   },
   {
-   "s": "quest:quest_arthur",
+   "s": "quest:quest_itwatchtower",
    "t": "item:bat_bones",
    "type": "involves",
    "l": "involves item",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_itwatchtower",
+   "s": "quest:quest_arthur",
    "t": "item:bat_bones",
    "type": "involves",
    "l": "involves item",
@@ -89883,14 +89883,14 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_desertrescue",
+   "s": "quest:quest_itgronigen",
    "t": "item:bronze_bar",
    "type": "involves",
    "l": "involves item",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_itgronigen",
+   "s": "quest:quest_desertrescue",
    "t": "item:bronze_bar",
    "type": "involves",
    "l": "involves item",
@@ -89925,7 +89925,7 @@
    "r": "ground items"
   },
   {
-   "s": "quest:quest_itexam",
+   "s": "quest:quest_waterfall",
    "t": "item:gold_bar",
    "type": "involves",
    "l": "involves item",
@@ -89946,7 +89946,7 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_waterfall",
+   "s": "quest:quest_itexam",
    "t": "item:gold_bar",
    "type": "involves",
    "l": "involves item",
@@ -89995,28 +89995,14 @@
    "r": "ground items"
   },
   {
+   "s": "quest:quest_legends",
+   "t": "item:hammer",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
    "s": "quest:quest_elemental_workshop",
-   "t": "item:hammer",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_desertrescue",
-   "t": "item:hammer",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_vampire",
-   "t": "item:hammer",
-   "type": "involves",
-   "l": "involves item",
-   "r": "in quest"
-  },
-  {
-   "s": "quest:quest_crest",
    "t": "item:hammer",
    "type": "involves",
    "l": "involves item",
@@ -90030,7 +90016,21 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_legends",
+   "s": "quest:quest_desertrescue",
+   "t": "item:hammer",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_crest",
+   "t": "item:hammer",
+   "type": "involves",
+   "l": "involves item",
+   "r": "in quest"
+  },
+  {
+   "s": "quest:quest_vampire",
    "t": "item:hammer",
    "type": "involves",
    "l": "involves item",
@@ -90093,14 +90093,14 @@
    "r": "in quest"
   },
   {
-   "s": "quest:quest_legends",
+   "s": "quest:quest_zanaris",
    "t": "item:rune_axe",
    "type": "involves",
    "l": "involves item",
    "r": "in quest"
   },
   {
-   "s": "quest:quest_zanaris",
+   "s": "quest:quest_legends",
    "t": "item:rune_axe",
    "type": "involves",
    "l": "involves item",
