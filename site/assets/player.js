@@ -191,7 +191,7 @@ var PP = (function () {
   function applyLoadout(state, loadout) {
     state.eq = {};
     for (var slot in loadout.eq) state.eq[slot] = String(loadout.eq[slot]);
-    state.style = 0;
+    state.style = loadout.st || 0;                    // a kit can name its style (knives on rapid)
   }
   function applyLevels(state, preset) {
     for (var k in preset.lv) state.lv[k] = preset.lv[k];

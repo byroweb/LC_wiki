@@ -4,7 +4,7 @@
   "content_path": "source/content",
   "coordinates": "absolute world tiles {level,x,z}; 0_50_50_21_18 -> level 0, x 3221, z 3218",
   "covers": "every NPC config: attackable, aggressive and hunts (from its .hunt config and huntrange), the hunt checks by name with whether the block is a reconstruction, spawns inside the exact Wilderness zone, poison param, computed max hits, wander/max range, areas; random-event NPCs with behaviour flags read from their scripts",
-  "date": "2026-09-21",
+  "date": "2026-10-19",
   "not_covered": "magic max hits; an NPC whose hunt mode names a block no .hunt file defines gets aggressive=null",
   "revision": "254",
   "revision_date": "September 7, 2004",
@@ -39784,6 +39784,6 @@
   "rule": "inside these rectangles a hunt block with level_check=outside_wilderness applies no level check: every hunter attacks any combat level; tolerates, line_of_sight and huntrange still apply",
   "source": "scripts/areas/area_wilderness/configs/wilderness_zones.dbrow",
   "tolerance_rule": "a hunter with tolerates=true ignores a player who has stayed within one 21x21-tile zone for tolerance_ticks ticks (engine Player.updateAfkZones); leaving the zone resets it",
-  "tolerance_ticks": 1000
+  "tolerance_ticks": null
  }
 }

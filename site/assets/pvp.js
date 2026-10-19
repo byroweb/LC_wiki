@@ -167,16 +167,40 @@ function load() {
     if (k === 'you') any = PP.fromHash(S.a, v) || any;
     if (k === 'them') any = PP.fromHash(S.b, v) || any;
   });
-  if (!any) {
-    // something to look at: full rune at 40s against a melee pure
-    PP.applyLoadout(S.a, G.loadouts[0]); PP.applyLevels(S.a, G.levelPresets[0]);
-    PP.applyLoadout(S.b, G.loadouts[1]); PP.applyLevels(S.b, G.levelPresets[3]);
-  }
+  if (!any) applyMatchup(G.matchups[0]);   // something to look at: full rune at 40s against a melee pure
   loading = false;
+}
+
+// ------------------------------------------------------------------ matchups
+
+/* A matchup is a loadout and a level preset for each side, by index (build/gear.py MATCHUPS). */
+function applyMatchup(m) {
+  [[S.a, m.a], [S.b, m.b]].forEach(function (p) {
+    var st = p[0];
+    PP.applyLoadout(st, G.loadouts[p[1][0]]);
+    PP.applyLevels(st, G.levelPresets[p[1][1]]);
+    for (var k in st.pray) st.pray[k] = PP.OFF;      // a clean start: no prayers left over from the last fight
+  });
+}
+
+function renderMatchups() {
+  var root = el('matchups');
+  if (!root) return;
+  root.innerHTML = G.matchups.map(function (m, i) {
+    return '<button data-i="' + i + '" title="' + esc(m.note) + '">' + esc(m.n) + '</button>';
+  }).join('');
+  Array.prototype.forEach.call(root.querySelectorAll('button'), function (b) {
+    b.onclick = function () {
+      applyMatchup(G.matchups[+b.dataset.i]);
+      panels.a.render(); panels.b.render();
+      save(); render();
+    };
+  });
 }
 
 function init() {
   load();
+  renderMatchups();
   var onChange = function () { save(); render(); };
   panels.a = new PP.Panel({ root: el('you'), state: S.a, onChange: onChange, label: 'You', stacked: true });
   panels.b = new PP.Panel({ root: el('them'), state: S.b, onChange: onChange, label: 'Them', stacked: true });
