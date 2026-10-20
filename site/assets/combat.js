@@ -187,6 +187,23 @@ var CB = (function () {
     };
   }
 
+  /* [proc,pvp_hit_roll]: the attacker's own attack roll against the defender's
+   * own defence roll -- the same two numbers playerStats works out -- and a
+   * protection prayer that scales the max hit rather than zeroing it, as
+   * pvp_melee.rs2 and pvp_ranged.rs2 do with scale(6, 10, $maxhit).
+   * `defProtects` is the style the defender's protection prayer covers, or null. */
+  function pvpDealt(att, def, defProtects) {
+    var dt = Math.min(Math.max(att.damagetype, 0), 4);
+    var style = dt === DT_RANGED ? 'ranged' : (dt === DT_MAGIC ? 'magic' : 'melee');
+    var maxhit = att.maxhit, cut = defProtects === style;
+    if (cut) maxhit = Math.trunc(maxhit * G.pvp.protect[0] / G.pvp.protect[1]);
+    var chance = att.fires ? hitChance(att.attackRoll, def.defenceRolls[dt]) : 0;
+    return {
+      defenceRoll: def.defenceRolls[dt], hit: chance, maxhit: maxhit, cut: cut,
+      dps: chance * (maxhit / 2) / (att.rate * TICK)
+    };
+  }
+
   return {
     TICK: TICK, SLOT_WEAPON: SLOT_WEAPON, SLOT_SHIELD: SLOT_SHIELD, SLOT_AMMO: SLOT_AMMO,
     STYLE_RANGED_RAPID: STYLE_RANGED_RAPID,
@@ -195,6 +212,6 @@ var CB = (function () {
     hitChance: hitChance, item: item, slotItems: slotItems, ammoFits: ammoFits, bonuses: bonuses,
     canFire: canFire, weight: weight,
     styleRows: styleRows, attackRate: attackRate, playerStats: playerStats,
-    playerDefenceRoll: playerDefenceRoll, npcDefenceRoll: npcDefenceRoll, dealt: dealt
+    playerDefenceRoll: playerDefenceRoll, npcDefenceRoll: npcDefenceRoll, dealt: dealt, pvpDealt: pvpDealt
   };
 })();

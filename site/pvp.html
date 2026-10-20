@@ -1,0 +1,84 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Player vs player - Lost City Wiki</title><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="assets/style.css?v=1792379596"><script defer src="data/gear.js?v=1792379596"></script><script defer src="assets/combat.js?v=1792379596"></script><script defer src="assets/player.js?v=1792379596"></script><script defer src="assets/pvp.js?v=1792379596"></script></head><body data-base=""><header class="top"><a class="brand" href="index.html">Lost City Wiki</a><nav><a href="map.html">World map</a><a href="graph.html">Knowledge graph</a><a href="chunks.html">Chunk picker</a><a href="gear.html">Equipment</a><a href="compare.html">Weapons</a><a href="pvp.html">PvP</a><a href="npcs.html">NPCs</a><a href="items.html">Items</a><a href="areas.html">Areas</a><a href="quests.html">Quests</a><a href="shops.html">Shops</a><a href="tables.html">Drop tables</a></nav><div class="search"><input id="q" placeholder="Search the wiki..." autocomplete="off"><div class="results" id="q-results"></div></div></header><main><style>
+  .pvp-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 10px 0; }
+  .stats .box { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; }
+  .stats .box b { display: block; font-size: 23px; color: var(--accent); line-height: 1.25; }
+  .stats .box .sub2 { font-size: 11.5px; color: var(--muted); }
+  .verdict { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 12px 14px; margin: 10px 0; }
+  .verdict b.win { color: #9be59b; } .verdict b.lose { color: #ffb0a0; }
+  .side h3 { margin: 14px 0 4px; }
+  .warn { color: #ffb0a0; }
+  #sweep { overflow-x: auto; }   /* eight columns: the table scrolls, the page does not */
+  table.data td.cur, table.data tr.cur td { background: #343026; }
+  table.data td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .matchups button { background: var(--panel2); color: var(--text); border: 1px solid var(--border); border-radius: 4px;
+    padding: 5px 10px; margin: 0 6px 6px 0; cursor: pointer; font: inherit; font-size: 13px; }
+  .matchups button:hover { border-color: var(--accent); }
+  .builds p { max-width: 900px; }
+  @media (max-width: 900px) { .pvp-cols { grid-template-columns: 1fr; } }
+</style>
+
+<h1>Player vs player</h1>
+<div class="sub">Two players, built the same way as on the equipment page, and the damage going both ways
+between them &mdash; with the two things a fight between players does differently: the defender's own
+defence roll, and a protection prayer that cuts the hit rather than stopping it.</div>
+
+<div class="small" style="margin-top:10px">Start from a fight worth looking at &mdash; each button sets both
+players' equipment and levels and clears their prayers. Why these builds are interesting is
+<a href="#builds">below</a>.</div>
+<div id="matchups" class="matchups" style="margin-top:6px"></div>
+
+<div class="pvp-cols">
+  <div id="you"></div>
+  <div id="them"></div>
+</div>
+
+<h2>The fight</h2>
+<div id="verdict" class="verdict"></div>
+<div class="pvp-cols">
+  <div class="side" id="side-a"></div>
+  <div class="side" id="side-b"></div>
+</div>
+<p class="small" id="notes"></p>
+
+<h2>Every weapon you could wield against them</h2>
+<div class="small">Your armour, levels and prayers as set above, with each weapon you meet the level for
+in the weapon slot &mdash; a two-hander puts your shield down, a bow fires what is in your quiver &mdash;
+and each of its styles. Sorted by the damage a second it does to them. Your current weapon and style is
+highlighted.</div>
+<div id="sweep"></div>
+
+<h2 id="builds">What the scripts say about building for player-killing</h2>
+<div class="builds">
+<p><b>Only your best attacking style counts toward combat level.</b> <code>[proc,player_combat_level]</code> adds
+defence, hitpoints and half of prayer, then only the largest of three offence terms: 13 &times; (attack + strength),
+13 &times; 1.5 &times; ranged, or 13 &times; 1.5 &times; magic. A melee pure can therefore raise ranged and magic to
+two thirds of attack plus strength without the offence term moving off melee. It is not quite free: every point of
+ranged damage also gives hitpoints xp, so the hitpoints estimate on the panels rises with ranged. Magic trained by
+casting is mostly the spell's base xp, which gives no hitpoints. Load the tribrid pure levels and watch the combat
+level against the plain pure.</p>
+
+<p><b>Magic defence is mostly magic level.</b> <code>[proc,player_combat_stat]</code> builds the magic defence roll
+from seven tenths of magic level and three tenths of defence. A pure with 1 magic and 1 defence is the easiest target
+there is for spells, and its free magic levels are its cheapest protection. Rune armour carries negative magic
+defence bonuses, so a tank in plate leans on its own magic level even more. Magic attacks are not modelled on this
+page, so this is the one side of these fights the numbers above do not show.</p>
+
+<p><b>Against 1 defence, accuracy costs almost nothing.</b> The defender's roll is their effective defence times
+their defence bonus plus 64. At 1 defence it stays small whatever they wear, so an attacker's hit chance against them
+barely moves with attack bonus. That lets an attacker wear plate, with its ranged attack penalties, for the defence it
+gives against the pure's own hits.</p>
+
+<p><b>Rapid takes a tick off every throw.</b> <code>[label,pvp_ranged_attack]</code> knocks one tick off the attack
+delay on the rapid style. Rune knives are one-handed, so the kiteshield stays on, and on rapid they throw faster than a
+shortbow fires. The ranged tank puts these together: rune plate and a kiteshield for defence, black dragonhide chaps and
+vambraces where rune has nothing better for ranged, and knives on rapid. Compare it with each pure using the buttons at
+the top.</p>
+
+<p><b>The price is combat level.</b> Each defence level is a quarter of a combat level, against about a third for
+attack or strength and about a half for ranged or magic. <code>[proc,pvp_level_check]</code> only lets two players
+fight when their combat levels differ by no more than the wilderness level, so a heavier account meets low pures only
+deeper in. A protection prayer cuts a hit to six tenths rather than stopping it, and Protect from Magic halves how long
+a bind, snare or entangle holds.</p>
+</div>
+</main><footer>Generated from the LostCityRS <code>Content</code> repository, revision 254 (September 7, 2004). Game assets are the property of Jagex Ltd.</footer><script src="data/search.js?v=1792379596"></script><script src="assets/wiki.js?v=1792379596"></script></body></html>

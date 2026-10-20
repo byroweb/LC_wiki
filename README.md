@@ -285,6 +285,42 @@ also works in most browsers because every data file is a plain `.js` file.
   50, 60 and 70. Quest requirements are recorded but not checked; only level
   gates are.
   Data: `build/gear.py` -> `site/data/gear.js`.
+  The player itself -- equipment grid and picker, style tabs, levels, prayers --
+  is `assets/player.js`, one `PP.Panel` per player, shared with the
+  player-vs-player page so a player is built the same way everywhere. It carries
+  one-click **loadouts** (full rune; a 1-defence pure in iron, chaos gauntlets
+  and climbing boots, with a rune scimitar or a magic shortbow) and **level
+  presets** (40/40/40, 60/60/60, 70/70/70, and pures at 40/70/1 with 70 ranged
+  and 60/90/1 with 90), both resolved by config name at build time so a renamed
+  obj fails the build. Applying a level preset also sets **hitpoints**, and the
+  panel always says what the combat levels alone would have made of it:
+  `[proc,give_combat_experience]` gives four xp a point of damage to the skill
+  and 1.33 to hitpoints, so an account's hitpoints xp is a third of its attack +
+  strength + defence + ranged xp on top of the 1154 (level 10) everyone starts
+  with. Magic is left out on purpose -- its damage xp carries hitpoints the same
+  way, but most magic xp is the base a spell gives for being cast, which carries
+  none. The xp table is the engine's own arithmetic from `Player.ts`
+  (`floor(level + 300 * 2^(level/7))` accumulated and quartered), re-matched
+  against that file when the engine checkout is beside the content; the combat
+  level is `[proc,player_combat_level]`, integer division and all. So 40/40/40
+  reads hitpoints 40 and combat 46, and a 40/70/1 pure with 70 ranged reads
+  hitpoints 66 and combat 52.
+- `site/pvp.html` - player vs player. Two of those players side by side and the
+  damage going both ways: who drops whom first, by how much, and what each
+  side's prayers cost over the fight. A fight between players differs from one
+  with a monster in exactly two places, both read from the content: the
+  defender has a player's defence roll (`[proc,pvp_hit_roll]` rolls
+  `player_attack_roll_specific` against `player_defence_roll_specific`, the same
+  procs as the equipment page), and a protection prayer scales the hit by 6/10
+  (`pvp_melee.rs2`, `pvp_ranged.rs2`: `scale(6, 10, $maxhit)`) rather than
+  setting it to nothing. Below the verdict is **every weapon you could wield
+  against them** -- each weapon you meet the level for on each of its styles,
+  with your armour, levels and prayers as set, sorted by damage a second, your
+  current choice highlighted -- which is the page's real reason to exist: whether
+  anything at your attack level beats the rune scimitar into full rune. Out of
+  scope, and said so on the page: special attacks, food, poison, magic (no
+  autocast model anywhere on these pages), and tick-eating, where a hit is
+  capped at the hitpoints you have left.
 - `site/compare.html` - weapon comparison. Two weapons, a style each, one shared
   kit, and the damage a second both deal to every monster in the game, sortable
   and filterable. The head-to-head splits the answer into the two things that

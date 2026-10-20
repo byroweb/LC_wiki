@@ -381,6 +381,235 @@ def build_prayer_drain(b):
     return effects, int(m.group(1)), int(m.group(2))
 
 
+# ---------------------------------------------------------------- players
+
+# The starting kits the pages offer as one click.  They are config names so a
+# renamed obj fails the build rather than silently emptying a slot.  A fourth
+# field names the attack style the kit starts on (a button label from the
+# weapon's combat interface); without one it starts on the first.
+LOADOUTS = [
+    ('Full rune', 'Rune scimitar and the four rune pieces, with an amulet of power, chaos gauntlets and climbing boots.',
+     {'righthand': 'rune_scimitar', 'hat': 'rune_full_helm', 'torso': 'rune_platebody', 'legs': 'rune_platelegs',
+      'lefthand': 'rune_kiteshield', 'front': 'amulet_of_power', 'hands': 'gauntlets_of_chaos', 'feet': 'death_climbingboots'}),
+    ('Pure, melee', 'What 1 defence can wear: iron platebody, platelegs, kiteshield and full helm, chaos gauntlets, '
+     'climbing boots, and a rune scimitar.',
+     {'righthand': 'rune_scimitar', 'hat': 'iron_full_helm', 'torso': 'iron_platebody', 'legs': 'iron_platelegs',
+      'lefthand': 'iron_kiteshield', 'front': 'amulet_of_power', 'hands': 'gauntlets_of_chaos', 'feet': 'death_climbingboots'}),
+    ('Pure, ranged', 'The same 1-defence kit built for a bow: iron platebody and full helm, black dragonhide chaps and '
+     'vambraces (ranged 70), climbing boots, a magic shortbow and rune arrows, on rapid.',
+     {'righthand': 'magic_shortbow', 'quiver': 'rune_arrow', 'hat': 'iron_full_helm', 'torso': 'iron_platebody',
+      'legs': 'black_dragonhide_chaps', 'hands': 'black_dragon_vambraces', 'front': 'amulet_of_power',
+      'feet': 'death_climbingboots'}, 'Rapid'),
+    ('Pure, two-hander', 'The 1-defence kit with the shield given up for a rune 2h sword and an amulet of strength: '
+     'iron platebody, platelegs and full helm, chaos gauntlets, climbing boots.',
+     {'righthand': 'rune_2h_sword', 'hat': 'iron_full_helm', 'torso': 'iron_platebody', 'legs': 'iron_platelegs',
+      'front': 'amulet_of_strength', 'hands': 'gauntlets_of_chaos', 'feet': 'death_climbingboots'}),
+    ('Ranged tank', 'Rune full helm, platebody (Dragon Slayer) and kiteshield over black dragonhide chaps and '
+     'vambraces, an amulet of glory, climbing boots, and rune knives on rapid: a one-handed thrown weapon keeps '
+     'the shield on, and rapid takes a tick off every throw.',
+     {'righthand': 'rune_knife', 'hat': 'rune_full_helm', 'torso': 'rune_platebody', 'lefthand': 'rune_kiteshield',
+      'legs': 'black_dragonhide_chaps', 'hands': 'black_dragon_vambraces', 'front': 'amulet_of_glory_4',
+      'feet': 'death_climbingboots'}, 'Rapid'),
+]
+
+LEVEL_PRESETS = [
+    ('40/40/40', {'attack': 40, 'strength': 40, 'defence': 40, 'ranged': 1, 'magic': 1, 'prayer': 1}),
+    ('60/60/60', {'attack': 60, 'strength': 60, 'defence': 60, 'ranged': 1, 'magic': 1, 'prayer': 1}),
+    ('70/70/70', {'attack': 70, 'strength': 70, 'defence': 70, 'ranged': 1, 'magic': 1, 'prayer': 1}),
+    ('Pure 40/70/1, 70 ranged', {'attack': 40, 'strength': 70, 'defence': 1, 'ranged': 70, 'magic': 1, 'prayer': 1}),
+    ('Pure 60/90/1, 90 ranged', {'attack': 60, 'strength': 90, 'defence': 1, 'ranged': 90, 'magic': 1, 'prayer': 1}),
+    # ranged and magic as high as they go without the offence term of
+    # [proc,player_combat_level] moving off melee (see the PvP page)
+    ('Tribrid pure 60/90/1, 99 ranged and magic',
+     {'attack': 60, 'strength': 90, 'defence': 1, 'ranged': 99, 'magic': 99, 'prayer': 1}),
+    ('Ranged tank 1/1/40, 85 ranged, 60 magic, 37 prayer',
+     {'attack': 1, 'strength': 1, 'defence': 40, 'ranged': 85, 'magic': 60, 'prayer': 37}),
+]
+
+# One-click fights on the PvP page: (name, note, (your kit, your levels), (their kit, their levels)),
+# by the names above, so a renamed preset fails the build.
+MATCHUPS = [
+    ('Full rune vs melee pure', 'Full rune at 40s against a 40/70/1 pure with a scimitar.',
+     ('Full rune', '40/40/40'), ('Pure, melee', 'Pure 40/70/1, 70 ranged')),
+    ('Ranged tank vs two-hand pure', 'Rune plate and rapid rune knives against a tribrid pure swinging a rune 2h.',
+     ('Ranged tank', 'Ranged tank 1/1/40, 85 ranged, 60 magic, 37 prayer'),
+     ('Pure, two-hander', 'Tribrid pure 60/90/1, 99 ranged and magic')),
+    ('Ranged tank vs ranged pure', 'The same tank against the tribrid pure with a magic shortbow.',
+     ('Ranged tank', 'Ranged tank 1/1/40, 85 ranged, 60 magic, 37 prayer'),
+     ('Pure, ranged', 'Tribrid pure 60/90/1, 99 ranged and magic')),
+    ('Tribrid pure vs ranged tank', 'The other way round: the pure with the 2h as you, the tank as them.',
+     ('Pure, two-hander', 'Tribrid pure 60/90/1, 99 ranged and magic'),
+     ('Ranged tank', 'Ranged tank 1/1/40, 85 ranged, 60 magic, 37 prayer')),
+]
+
+
+def build_xp_table():
+    """Experience to reach each level 1..99, the engine's own arithmetic.
+
+    Player.ts: for each level, `delta = floor(level + 2^(level/7) * 300)`,
+    accumulated, and the table holds `floor(acc / 4)` (times ten internally, as
+    all xp is).  Level 1 is 0; level 10 is 1154, where every account's
+    hitpoints start.  When the engine checkout is beside the content the
+    formula is re-matched against it, so this cannot drift quietly.
+    """
+    engine = os.path.join(common.SOURCE, 'engine', 'src', 'engine', 'entity', 'Player.ts')
+    if os.path.exists(engine):
+        src = read_text(engine)
+        for pattern in (r'Math\.pow\(2\.0,\s*level\s*/\s*7\.0\)\s*\*\s*300\.0', r'Math\.floor\(acc\s*/\s*4\)\s*\*\s*10'):
+            if not re.search(pattern, src):
+                raise SystemExit('gear: %s no longer matches the engine xp table in Player.ts - update build_xp_table' % pattern)
+    table = [0]
+    acc = 0
+    for level in range(1, 99):
+        acc += int(level + (2.0 ** (level / 7.0)) * 300.0)
+        table.append(acc // 4)
+    assert table[9] == 1154, table[9]
+    return table
+
+
+def build_combat_xp(b):
+    """What a point of damage is worth, from [proc,give_combat_experience].
+
+    `$base` is damage x 10, then 400/100 of it to the skill for melee and
+    ranged and 133/100 of it to hitpoints -- four and one-and-a-third a point.
+    That ratio is the whole of the hitpoints estimate: a level's worth of
+    attack, strength, defence or ranged xp came with a third as much again in
+    hitpoints, on top of the 1154 everyone starts with at level 10.  Magic is
+    left out of it on purpose: the damage xp carries hitpoints the same way, but
+    most magic xp is the spell's own base for casting, which carries none.
+    """
+    blk = b.blocks.get(('proc', 'give_combat_experience'))
+    if not blk:
+        raise SystemExit('gear: [proc,give_combat_experience] not found - the hitpoints estimate needs updating')
+    body = blk['body']
+    # anchor on the accurate case: attack is also advanced by controlled, at a third
+    skill = re.findall(r'\^style_melee_accurate\s*:\s*stat_advance\(attack, scale\(\$multiplier, 1000, '
+                       r'scale\((\d+), 100, \$base\)\)\)', body)
+    hp = re.findall(r'stat_advance\(hitpoints, scale\(\$multiplier, 1000, scale\((\d+), 100, \$base\)\)\)', body)
+    if not skill or not hp:
+        raise SystemExit('gear: [proc,give_combat_experience] (%s) no longer awards xp the way build_combat_xp reads it'
+                         % blk['file'])
+    # the last match is the ordinary branch; the earlier ones are the tutorial's
+    return {'skill': int(skill[-1]) / 100.0, 'hitpoints': int(hp[-1]) / 100.0}
+
+
+def check_combat_level(b):
+    """[proc,player_combat_level], which the pages reproduce in static/player.js."""
+    blk = b.blocks.get(('proc', 'player_combat_level'))
+    if not blk:
+        raise SystemExit('gear: [proc,player_combat_level] not found - combatLevel in static/player.js needs updating')
+    for pattern in (r'10 \* \(stat_base\(defence\) \+ stat_base\(hitpoints\) \+ stat_base\(prayer\) / 2\)',
+                    r'13 \* \(stat_base\(attack\) \+ stat_base\(strength\)\)',
+                    r'13 \* scale\(3, 2, stat_base\(ranged\)\)',
+                    r'13 \* scale\(3, 2, stat_base\(magic\)\)',
+                    r'max\(max\(\$melee, \$ranged\), \$magic\)\)/40'):
+        if not re.search(pattern, blk['body']):
+            raise SystemExit('gear: %s no longer matches [proc,player_combat_level] (%s) - update combatLevel in '
+                             'static/player.js' % (pattern, blk['file']))
+
+
+def build_pvp(b):
+    """The one place a fight between players differs from a fight with a monster.
+
+    [proc,pvp_hit_roll] rolls the attacker's own attack roll against the
+    defender's own defence roll -- the same two procs the monster fight reads --
+    so the only thing to carry is what a protection prayer does: against a
+    monster it sets the damage to zero, against a player pvp_melee.rs2 and
+    pvp_ranged.rs2 do `scale(6, 10, $maxhit)`, a 40% cut.  Both are read.
+    """
+    scales = set()
+    for name in ('pvp_melee_attack', 'pvp_ranged_attack'):
+        blk = b.blocks.get(('label', name))
+        if not blk:
+            raise SystemExit('gear: [label,%s] not found - the pvp model needs updating' % name)
+        m = re.search(r'check_protect_prayer\([^)]*\) = true\) \{\s*\$maxhit = scale\((\d+), (\d+), \$maxhit\)', blk['body'])
+        if not m:
+            raise SystemExit('gear: [label,%s] (%s) no longer scales the max hit under a protection prayer - '
+                             'update build_pvp' % (name, blk['file']))
+        scales.add((int(m.group(1)), int(m.group(2))))
+    if len(scales) != 1:
+        raise SystemExit('gear: pvp melee and ranged no longer agree on the protection scale: %s' % sorted(scales))
+    hit = b.blocks.get(('proc', 'pvp_hit_roll'))
+    if not hit or not re.search(r'player_attack_roll_specific\(\$damagetype\)', hit['body']) \
+            or not re.search(r'player_defence_roll_specific\(\$damagetype\)', hit['body']):
+        raise SystemExit('gear: [proc,pvp_hit_roll] no longer uses the player rolls - update build_pvp')
+    return {'protect': list(scales.pop())}
+
+
+def build_presets(b, items_by_cfg, items, cat2table, style_tables):
+    """Resolve the kits above to item ids, failing on anything that is not there.
+
+    A kit that names a style gets that style's index on its weapon's table, so
+    a style that is not on the weapon fails the build too."""
+    out = []
+    for entry in LOADOUTS:
+        name, note, kit = entry[:3]
+        eq = {}
+        for pos, cfg in kit.items():
+            iid = items_by_cfg.get(cfg)
+            if iid is None:
+                raise SystemExit('gear: loadout "%s" names %s, which is not an equippable item' % (name, cfg))
+            eq[str(WEARPOS.index(pos))] = iid
+        rec = {'n': name, 'note': note, 'eq': eq}
+        if len(entry) > 3:
+            weapon = items[items_by_cfg[kit['righthand']]]
+            rows = style_tables.get(cat2table.get(weapon.get('cat'), ''), [])
+            labels = [r[0] for r in rows]
+            if entry[3] not in labels:
+                raise SystemExit('gear: loadout "%s" starts on style %s, which %s does not have (%s)'
+                                 % (name, entry[3], kit['righthand'], ', '.join(labels) or 'no styles'))
+            rec['st'] = labels.index(entry[3])
+        out.append(rec)
+    return out
+
+
+def build_matchups():
+    """[{n, note, a: [loadout, levels], b: [loadout, levels]}] by index into the lists above."""
+    kits = [e[0] for e in LOADOUTS]
+    levels = [n for n, _ in LEVEL_PRESETS]
+    out = []
+    for name, note, a, b in MATCHUPS:
+        sides = []
+        for kit, lv in (a, b):
+            if kit not in kits or lv not in levels:
+                raise SystemExit('gear: matchup "%s" names %s / %s, which is not a loadout and level preset'
+                                 % (name, kit, lv))
+            sides.append([kits.index(kit), levels.index(lv)])
+        out.append({'n': name, 'note': note, 'a': sides[0], 'b': sides[1]})
+    return out
+
+
+def check_pvp_builds(b):
+    """The script facts the PvP page's notes on builds rest on.
+
+    [proc,player_combat_stat] makes magic defence seven tenths magic level and
+    three tenths defence; [label,pvp_ranged_attack] takes a tick off a throw on
+    rapid; [proc,pvp_level_check] holds the combat level difference to the
+    wilderness level; and [proc,pvp_freeze_effect] halves a hold under Protect
+    from Magic.  The combat level formula they also lean on is
+    check_combat_level's."""
+    blk = b.blocks.get(('proc', 'player_combat_stat'))
+    if not blk or not re.search(r'\$effective_magic_defence = divide\(add\(multiply\(7, \$effective_magic\), '
+                                r'multiply\(3, \$effective_defence\)\), 10\)', blk['body']):
+        raise SystemExit('gear: [proc,player_combat_stat] no longer splits magic defence 7/3 between magic and '
+                         'defence - update the notes in static/pvp_body.html')
+    blk = b.blocks.get(('label', 'pvp_ranged_attack'))
+    if not blk or not re.search(r'%damagestyle = \^style_ranged_rapid\) \{\s*%action_delay = sub\(%action_delay, 1\)',
+                                blk['body']):
+        raise SystemExit('gear: [label,pvp_ranged_attack] no longer takes a tick off on rapid - update the notes in '
+                         'static/pvp_body.html')
+    blk = b.blocks.get(('proc', 'pvp_level_check'))
+    if not blk or not re.search(r'abs\(sub\(~player_combat_level, ~\.player_combat_level\)\)', blk['body']) \
+            or not re.search(r'\$wilderness_level < \$combat_level_diff', blk['body']):
+        raise SystemExit('gear: [proc,pvp_level_check] no longer compares the combat level difference with the '
+                         'wilderness level - update the notes in static/pvp_body.html')
+    blk = b.blocks.get(('proc', 'pvp_freeze_effect'))
+    if not blk or not re.search(r'check_protect_prayer\(\^magic_style\) = true\) \{\s*\$freeze_time = '
+                                r'divide\(\$freeze_time, 2\)', blk['body']):
+        raise SystemExit('gear: [proc,pvp_freeze_effect] no longer halves a hold under Protect from Magic - update '
+                         'the notes in static/pvp_body.html')
+
+
 def build_prayers(b, constants):
     """[[varp, name, level, kind, multiplier, drain effect]] for the prayers the fight maths reads.
 
@@ -859,6 +1088,11 @@ def build_gear_data(b):
     reqs = build_requirements(b)
     prayers = build_prayers(b, constants)
     _, drain_base, drain_per_bonus = build_prayer_drain(b)
+    xp_table = build_xp_table()
+    combat_xp = build_combat_xp(b)
+    check_combat_level(b)
+    check_pvp_builds(b)
+    pvp = build_pvp(b)
     regen = build_regen(b)
     spells = build_spells(b, constants)
 
@@ -909,6 +1143,7 @@ def build_gear_data(b):
             rec['oa'] = 1            # fires ogre arrows and refuses ordinary ones
         items[it['id']] = rec
         cfgnames[it['id']] = it['name']
+    loadouts = build_presets(b, {name: iid for iid, name in cfgnames.items()}, items, cat2table, style_tables)
     _mark_variants(items, cfgnames)
     # what you wear is the worn form, so that is the one the pickers should offer
     by_cfg = {name: iid for iid, name in cfgnames.items()}
@@ -981,6 +1216,12 @@ def build_gear_data(b):
         'prayers': prayers,
         # points a tick = drain effect / (base + bonus * perBonus)
         'prayerDrain': {'base': drain_base, 'perBonus': drain_per_bonus},
+        'xp': xp_table,                       # xp to reach level i+1
+        'combatXp': combat_xp,                # per point of damage: to the skill, to hitpoints
+        'pvp': pvp,
+        'loadouts': loadouts,
+        'levelPresets': [{'n': n, 'lv': lv} for n, lv in LEVEL_PRESETS],
+        'matchups': build_matchups(),
         'breaths': {k: {kk: vv for kk, vv in v.items() if kk != 'checks'} for k, v in BREATHS.items()},
         'items': items,
         'monsters': monsters,
